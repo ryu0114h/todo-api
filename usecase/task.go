@@ -7,7 +7,7 @@ import (
 
 type TaskUseCase interface {
 	GetTasks(limit, offset int) ([]*model.Task, error)
-	GetTaskByID(id uint) (*model.Task, error)
+	GetTask(id uint) (*model.Task, error)
 	CreateTask(task *model.Task) (*model.Task, error)
 	UpdateTask(id uint, task *model.Task) (*model.Task, error)
 	DeleteTask(id uint) error
@@ -31,8 +31,12 @@ func (u *taskUseCase) GetTasks(limit, offset int) ([]*model.Task, error) {
 	return tasks, nil
 }
 
-func (u *taskUseCase) GetTaskByID(id uint) (*model.Task, error) {
-	return nil, nil
+func (u *taskUseCase) GetTask(id uint) (*model.Task, error) {
+	task, err := u.taskRepository.GetTask(id)
+	if err != nil {
+		return nil, err
+	}
+	return task, nil
 }
 
 func (u *taskUseCase) CreateTask(task *model.Task) (*model.Task, error) {

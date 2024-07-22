@@ -11,6 +11,7 @@ import (
 
 type TaskRepository interface {
 	GetTasks(limit, offset int) ([]*model.Task, error)
+	GetTask(id uint) (*model.Task, error)
 }
 
 type taskRepository struct {
@@ -29,4 +30,17 @@ func (r *taskRepository) GetTasks(limit, offset int) ([]*model.Task, error) {
 		return nil, myErrors.ErrDb
 	}
 	return tasks, nil
+}
+
+func (r *taskRepository) GetTask(id uint) (*model.Task, error) {
+	task := &model.Task{}
+	result := r.db.Preload("Assignee").Find(task, "id = ?", id)
+	if result.Error != nil {
+		slog.Info(fmt.Sprintf("error GetTask: %v", result.Error))
+		return nil, myErrors.ErrDb
+	}
+	if result.RowsAffected == 0 {
+		return nil, myErrors.ErrNotFound
+	}
+	return task, nil
 }

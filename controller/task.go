@@ -1,9 +1,13 @@
 package controller
 
 import (
+	"errors"
+	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"todo-api/controller/response"
+	myErrors "todo-api/errors"
 	"todo-api/model"
 	"todo-api/usecase"
 
@@ -20,7 +24,7 @@ const (
 
 type TaskController interface {
 	GetTasks(ctx echo.Context) error
-	GetTaskByID(ctx echo.Context) error
+	GetTask(ctx echo.Context) error
 	CreateTask(ctx echo.Context) error
 	UpdateTask(ctx echo.Context) error
 	DeleteTask(ctx echo.Context) error
@@ -49,22 +53,29 @@ func (c *taskController) GetTasks(ctx echo.Context) error {
 
 	tasks, err := c.taskUseCase.GetTasks(limit, offset)
 	if err != nil {
+		slog.Info(fmt.Sprintf("error GetTasks: %v", err))
 		return ctx.JSON(http.StatusInternalServerError, nil)
 	}
 	return ctx.JSON(http.StatusOK, response.NewGetTasksResponseBody(tasks))
 }
 
-func (c *taskController) GetTaskByID(ctx echo.Context) error {
+func (c *taskController) GetTask(ctx echo.Context) error {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, nil)
 	}
 
-	task, err := c.taskUseCase.GetTaskByID(uint(id))
+	task, err := c.taskUseCase.GetTask(uint(id))
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, nil)
+		if errors.Is(err, myErrors.ErrNotFound) {
+			return ctx.JSON(http.StatusNotFound, map[string]string{"error": "Task is not found"})
+		}
+
+		slog.Info(fmt.Sprintf("error GetTask: %v", err))
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to get task"})
 	}
-	return ctx.JSON(http.StatusOK, task)
+
+	return ctx.JSON(http.StatusOK, response.NewGetTaskResponseBody(task))
 }
 
 func (c *taskController) CreateTask(ctx echo.Context) error {
