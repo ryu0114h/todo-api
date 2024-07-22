@@ -5,7 +5,7 @@ import (
 	"todo-api/model"
 )
 
-// GetTasksResponseBody はタスク一覧取得リクエストのレスポンスボディ
+// GetTasksResponseBody はタスク一覧取得APIのレスポンスボディ
 type GetTasksResponseBody struct {
 	Tasks []*GetTasksResponseBodyTask `json:"tasks"`
 }
@@ -55,6 +55,55 @@ func NewGetTasksResponseBody(tasks []*model.Task) *GetTasksResponseBody {
 }
 
 func NewGetTasksResponseBodyAssignee(assignee *model.User) *GetTasksResponseBodyAssignee {
+	if assignee == nil {
+		return nil
+	}
+
+	return &GetTasksResponseBodyAssignee{
+		ID:           assignee.ID,
+		Username:     assignee.Username,
+		Email:        assignee.Email,
+		PasswordHash: assignee.PasswordHash,
+		Role:         assignee.Role,
+		CreatedAt:    assignee.CreatedAt,
+		UpdatedAt:    assignee.UpdatedAt,
+	}
+}
+
+// GetTaskResponseBody はタスク取得APIのレスポンスボディ
+type GetTaskResponseBody struct {
+	Task *GetTaskResponseBodyTask `json:"task"`
+}
+
+type GetTaskResponseBodyTask struct {
+	ID          uint                          `json:"id"`
+	Title       string                        `json:"title"`
+	Description string                        `json:"description"`
+	DueDate     *time.Time                    `json:"due_date"`
+	Visibility  string                        `json:"visibility"`
+	Status      string                        `json:"status"`
+	CreatedAt   time.Time                     `json:"created_at"`
+	UpdatedAt   time.Time                     `json:"updated_at"`
+	Assignee    *GetTasksResponseBodyAssignee `json:"assignee"`
+}
+
+func NewGetTaskResponseBody(task *model.Task) *GetTaskResponseBody {
+	return &GetTaskResponseBody{
+		Task: &GetTaskResponseBodyTask{
+			ID:          task.ID,
+			Title:       task.Title,
+			Description: task.Description,
+			DueDate:     task.DueDate,
+			Visibility:  task.Visibility,
+			Status:      task.Status,
+			CreatedAt:   task.CreatedAt,
+			UpdatedAt:   task.UpdatedAt,
+			Assignee:    NewGetTaskResponseBodyAssignee(task.Assignee),
+		},
+	}
+}
+
+func NewGetTaskResponseBodyAssignee(assignee *model.User) *GetTasksResponseBodyAssignee {
 	if assignee == nil {
 		return nil
 	}
