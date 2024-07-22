@@ -11,10 +11,12 @@ import (
 func main() {
 	slog.Info("starting server")
 
-	config.InitDB()
+	db := config.InitDB()
 
 	e := echo.New()
-	routes.RegisterRoutes(e)
+	routes.RegisterRoutes(e, db)
 
 	e.Logger.Fatal(e.Start(":8080"))
+
+	// TODO: Graceful Shutdown
 }
