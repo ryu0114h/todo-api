@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"strconv"
+	"todo-api/controller/response"
 	"todo-api/model"
 	"todo-api/usecase"
 
@@ -50,7 +51,7 @@ func (c *taskController) GetTasks(ctx echo.Context) error {
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, nil)
 	}
-	return ctx.JSON(http.StatusOK, tasks)
+	return ctx.JSON(http.StatusOK, response.NewGetTasksResponseBody(tasks))
 }
 
 func (c *taskController) GetTaskByID(ctx echo.Context) error {
