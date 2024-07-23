@@ -8,6 +8,6 @@ type User struct {
 	Email        string
 	PasswordHash string
 	Role         string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	CreatedAt    *time.Time
+	UpdatedAt    *time.Time
 }

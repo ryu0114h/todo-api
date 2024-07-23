@@ -7,10 +7,10 @@ import (
 
 type TaskUseCase interface {
 	GetTasks(companyId uint, limit, offset int) ([]*model.Task, error)
-	GetTask(id, companyId uint) (*model.Task, error)
+	GetTask(companyId, taskId uint) (*model.Task, error)
 	CreateTask(task *model.Task) (*model.Task, error)
-	UpdateTask(id uint, task *model.Task) (*model.Task, error)
-	DeleteTask(id uint) error
+	UpdateTask(companyId, taskId uint, task *model.Task) (*model.Task, error)
+	DeleteTask(companyId, taskId uint) error
 }
 
 type taskUseCase struct {
@@ -44,8 +44,8 @@ func (u *taskUseCase) GetTasks(companyId uint, limit, offset int) ([]*model.Task
 	return tasks, nil
 }
 
-func (u *taskUseCase) GetTask(id, companyId uint) (*model.Task, error) {
-	task, err := u.taskRepository.GetTask(companyId, id)
+func (u *taskUseCase) GetTask(companyId, taskId uint) (*model.Task, error) {
+	task, err := u.taskRepository.GetTask(companyId, taskId)
 	if err != nil {
 		return nil, err
 	}
@@ -67,10 +67,46 @@ func (u *taskUseCase) CreateTask(task *model.Task) (*model.Task, error) {
 	return task, nil
 }
 
-func (u *taskUseCase) UpdateTask(id uint, task *model.Task) (*model.Task, error) {
-	return nil, nil
+func (u *taskUseCase) UpdateTask(companyId, taskId uint, task *model.Task) (*model.Task, error) {
+	if task.AssigneeID != nil {
+		_, err := u.companyUserRepository.GetCompanyUser(task.CompanyID, *task.AssigneeID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	oldTask, err := u.taskRepository.GetTask(companyId, taskId)
+	if err != nil {
+		return nil, err
+	}
+
+	resultTask, err := u.taskRepository.UpdateTask(taskId, &model.Task{
+		ID:          oldTask.ID,
+		CompanyID:   oldTask.CompanyID,
+		Title:       task.Title,
+		Description: task.Description,
+		DueDate:     task.DueDate,
+		AssigneeID:  task.AssigneeID,
+		Visibility:  task.Visibility,
+		Status:      task.Status,
+		CreatedAt:   oldTask.CreatedAt,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return resultTask, nil
 }
 
-func (u *taskUseCase) DeleteTask(id uint) error {
+func (u *taskUseCase) DeleteTask(companyId, taskId uint) error {
+	_, err := u.taskRepository.GetTask(companyId, taskId)
+	if err != nil {
+		return err
+	}
+
+	err = u.taskRepository.DeleteTask(companyId, taskId)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

@@ -11,8 +11,10 @@ import (
 
 type TaskRepository interface {
 	GetTasks(companyId uint, limit, offset int) ([]*model.Task, error)
-	GetTask(id, companyId uint) (*model.Task, error)
+	GetTask(companyId, id uint) (*model.Task, error)
 	CreateTask(task *model.Task) (*model.Task, error)
+	UpdateTask(id uint, task *model.Task) (*model.Task, error)
+	DeleteTask(companyId, id uint) error
 }
 
 type taskRepository struct {
@@ -33,9 +35,9 @@ func (r *taskRepository) GetTasks(companyId uint, limit, offset int) ([]*model.T
 	return tasks, nil
 }
 
-func (r *taskRepository) GetTask(id, companyId uint) (*model.Task, error) {
+func (r *taskRepository) GetTask(companyId, id uint) (*model.Task, error) {
 	task := &model.Task{}
-	result := r.db.Preload("Assignee").Where("company_id = ?", companyId).Find(task, "id = ?", id)
+	result := r.db.Preload("Assignee").Where("id = ? AND company_id = ?", id, companyId).Find(task)
 	if result.Error != nil {
 		slog.Info(fmt.Sprintf("error GetTask: %v", result.Error))
 		return nil, myErrors.ErrDb
@@ -51,4 +53,23 @@ func (r *taskRepository) CreateTask(task *model.Task) (*model.Task, error) {
 		return nil, myErrors.ErrDb
 	}
 	return task, nil
+}
+
+func (r *taskRepository) UpdateTask(id uint, task *model.Task) (*model.Task, error) {
+	result := r.db.Save(task)
+	if err := result.Error; err != nil {
+		return nil, myErrors.ErrDb
+	}
+	return task, nil
+}
+
+func (r *taskRepository) DeleteTask(companyId, id uint) error {
+	result := r.db.Where("id = ? AND company_id = ?", id, companyId).Delete(&model.Task{})
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return myErrors.ErrNotFound
+	}
+	return nil
 }

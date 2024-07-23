@@ -20,6 +20,6 @@ func RegisterRoutes(e *echo.Echo, db *gorm.DB) {
 	apiV1.GET("/companies/:company_id/tasks", taskController.GetTasks)
 	apiV1.GET("/companies/:company_id/tasks/:task_id", taskController.GetTask)
 	apiV1.POST("/companies/:company_id/tasks", taskController.CreateTask)
-	apiV1.PATCH("/companies/:company_id/tasks/:task_id", taskController.UpdateTask)
+	apiV1.PUT("/companies/:company_id/tasks/:task_id", taskController.UpdateTask)
 	apiV1.DELETE("/companies/:company_id/tasks/:task_id", taskController.DeleteTask)
 }

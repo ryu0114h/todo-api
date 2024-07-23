@@ -18,19 +18,19 @@ type GetTasksResponseBodyTask struct {
 	DueDate     *time.Time                    `json:"due_date"`
 	Visibility  string                        `json:"visibility"`
 	Status      string                        `json:"status"`
-	CreatedAt   time.Time                     `json:"created_at"`
-	UpdatedAt   time.Time                     `json:"updated_at"`
+	CreatedAt   *time.Time                    `json:"created_at"`
+	UpdatedAt   *time.Time                    `json:"updated_at"`
 	Assignee    *GetTasksResponseBodyAssignee `json:"assignee"`
 }
 
 type GetTasksResponseBodyAssignee struct {
-	ID           uint      `json:"id"`
-	Username     string    `json:"username"`
-	Email        string    `json:"email"`
-	PasswordHash string    `json:"password_hash"`
-	Role         string    `json:"role"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           uint       `json:"id"`
+	Username     string     `json:"username"`
+	Email        string     `json:"email"`
+	PasswordHash string     `json:"password_hash"`
+	Role         string     `json:"role"`
+	CreatedAt    *time.Time `json:"created_at"`
+	UpdatedAt    *time.Time `json:"updated_at"`
 }
 
 func NewGetTasksResponseBody(tasks []*model.Task) *GetTasksResponseBody {
@@ -85,19 +85,19 @@ type GetTaskResponseBodyTask struct {
 	DueDate     *time.Time                   `json:"due_date"`
 	Visibility  string                       `json:"visibility"`
 	Status      string                       `json:"status"`
-	CreatedAt   time.Time                    `json:"created_at"`
-	UpdatedAt   time.Time                    `json:"updated_at"`
+	CreatedAt   *time.Time                   `json:"created_at"`
+	UpdatedAt   *time.Time                   `json:"updated_at"`
 	Assignee    *GetTaskResponseBodyAssignee `json:"assignee"`
 }
 
 type GetTaskResponseBodyAssignee struct {
-	ID           uint      `json:"id"`
-	Username     string    `json:"username"`
-	Email        string    `json:"email"`
-	PasswordHash string    `json:"password_hash"`
-	Role         string    `json:"role"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           uint       `json:"id"`
+	Username     string     `json:"username"`
+	Email        string     `json:"email"`
+	PasswordHash string     `json:"password_hash"`
+	Role         string     `json:"role"`
+	CreatedAt    *time.Time `json:"created_at"`
+	UpdatedAt    *time.Time `json:"updated_at"`
 }
 
 func NewGetTaskResponseBody(task *model.Task) *GetTaskResponseBody {
@@ -147,11 +147,28 @@ type CreateTaskResponseBodyTask struct {
 	DueDate     *time.Time `json:"due_date"`
 	Visibility  string     `json:"visibility"`
 	Status      string     `json:"status"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
+	CreatedAt   *time.Time `json:"created_at"`
+	UpdatedAt   *time.Time `json:"updated_at"`
 }
 
 func NewCreateTaskResponseBody(task *model.Task) *CreateTaskResponseBody {
+	return &CreateTaskResponseBody{
+		Task: &CreateTaskResponseBodyTask{
+			ID:          task.ID,
+			CompanyID:   task.CompanyID,
+			AssigneeID:  task.AssigneeID,
+			Title:       task.Title,
+			Description: task.Description,
+			DueDate:     task.DueDate,
+			Visibility:  task.Visibility,
+			Status:      task.Status,
+			CreatedAt:   task.CreatedAt,
+			UpdatedAt:   task.UpdatedAt,
+		},
+	}
+}
+
+func NewUpdateTaskResponseBody(task *model.Task) *CreateTaskResponseBody {
 	return &CreateTaskResponseBody{
 		Task: &CreateTaskResponseBodyTask{
 			ID:          task.ID,

@@ -9,7 +9,6 @@ import (
 	"todo-api/controller/request"
 	"todo-api/controller/response"
 	myErrors "todo-api/errors"
-	"todo-api/model"
 	"todo-api/usecase"
 
 	"github.com/go-playground/validator/v10"
@@ -83,7 +82,7 @@ func (c *taskController) GetTask(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, nil)
 	}
 
-	task, err := c.taskUseCase.GetTask(uint(id), uint(companyId))
+	task, err := c.taskUseCase.GetTask(uint(companyId), uint(id))
 	if err != nil {
 		if errors.Is(err, myErrors.ErrNotFound) {
 			return ctx.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
@@ -108,7 +107,6 @@ func (c *taskController) CreateTask(ctx echo.Context) error {
 	}
 
 	// Validation
-	// TODO: assignee_idのValidation
 	if err := validate.Struct(requestBody); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
@@ -123,27 +121,56 @@ func (c *taskController) CreateTask(ctx echo.Context) error {
 }
 
 func (c *taskController) UpdateTask(ctx echo.Context) error {
-	id, err := strconv.ParseUint(ctx.Param("task_id"), 10, 64)
+	taskId, err := strconv.ParseUint(ctx.Param("task_id"), 10, 64)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, nil)
 	}
 
-	task, err := c.taskUseCase.UpdateTask(uint(id), &model.Task{})
+	companyId, err := strconv.ParseUint(ctx.Param("company_id"), 10, 64)
 	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, nil)
+	}
+
+	requestBody := &request.UpdateTaskRequestBody{}
+	if err := ctx.Bind(requestBody); err != nil {
+		return err
+	}
+
+	// Validation
+	if err := validate.Struct(requestBody); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	task := request.NewTaskFromUpdateTaskRequestBody(uint(taskId), uint(companyId), requestBody)
+	task, err = c.taskUseCase.UpdateTask(uint(companyId), uint(taskId), task)
+	if err != nil {
+		if errors.Is(err, myErrors.ErrNotFound) {
+			return ctx.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
+		}
+
 		return ctx.JSON(http.StatusInternalServerError, nil)
 	}
 
-	return ctx.JSON(http.StatusOK, task)
+	return ctx.JSON(http.StatusOK, response.NewUpdateTaskResponseBody(task))
 }
 
 func (c *taskController) DeleteTask(ctx echo.Context) error {
-	id, err := strconv.ParseUint(ctx.Param("task_id"), 10, 64)
+	taskId, err := strconv.ParseUint(ctx.Param("task_id"), 10, 64)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, nil)
 	}
 
-	err = c.taskUseCase.DeleteTask(uint(id))
+	companyId, err := strconv.ParseUint(ctx.Param("company_id"), 10, 64)
 	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, nil)
+	}
+
+	err = c.taskUseCase.DeleteTask(uint(companyId), uint(taskId))
+	if err != nil {
+		if errors.Is(err, myErrors.ErrNotFound) {
+			return ctx.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
+		}
+
 		return ctx.JSON(http.StatusInternalServerError, nil)
 	}
 

@@ -11,7 +11,7 @@ type Task struct {
 	AssigneeID  *uint
 	Visibility  string
 	Status      string
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	CreatedAt   *time.Time
+	UpdatedAt   *time.Time
 	Assignee    *User
 }
