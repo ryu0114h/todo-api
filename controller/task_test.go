@@ -15,6 +15,7 @@ import (
 	mock_usecase "todo-api/mock/usecase"
 	"todo-api/model"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -25,7 +26,8 @@ func TestTaskController_GetTasks(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockUseCase := mock_usecase.NewMockTaskUseCase(ctrl)
-	taskController := NewTaskController(mockUseCase)
+	validate := validator.New()
+	taskController := NewTaskController(validate, mockUseCase)
 
 	testCases := []struct {
 		name           string
@@ -180,7 +182,8 @@ func TestTaskController_GetTask(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockUseCase := mock_usecase.NewMockTaskUseCase(ctrl)
-	taskController := NewTaskController(mockUseCase)
+	validate := validator.New()
+	taskController := NewTaskController(validate, mockUseCase)
 
 	testCases := []struct {
 		name           string
@@ -312,7 +315,8 @@ func TestTaskController_CreateTask(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockUseCase := mock_usecase.NewMockTaskUseCase(ctrl)
-	taskController := NewTaskController(mockUseCase)
+	validate := validator.New()
+	taskController := NewTaskController(validate, mockUseCase)
 
 	testCases := []struct {
 		name           string
@@ -426,7 +430,8 @@ func TestTaskController_UpdateTask(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockUseCase := mock_usecase.NewMockTaskUseCase(ctrl)
-	taskController := NewTaskController(mockUseCase)
+	validate := validator.New()
+	taskController := NewTaskController(validate, mockUseCase)
 
 	testCases := []struct {
 		name           string
@@ -574,7 +579,8 @@ func TestTaskController_DeleteTask(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockUseCase := mock_usecase.NewMockTaskUseCase(ctrl)
-	taskController := NewTaskController(mockUseCase)
+	validate := validator.New()
+	taskController := NewTaskController(validate, mockUseCase)
 
 	testCases := []struct {
 		name           string
