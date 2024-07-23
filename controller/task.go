@@ -39,9 +39,14 @@ func NewTaskController(taskUseCase usecase.TaskUseCase) TaskController {
 }
 
 func (c *taskController) GetTasks(ctx echo.Context) error {
+	companyIdStr := ctx.Param("company_id")
 	limitStr := ctx.QueryParam("limit")
 	offsetStr := ctx.QueryParam("offset")
 
+	companyId, err := strconv.ParseUint(companyIdStr, 10, 64)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "company_id is bad request"})
+	}
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
 		limit = DEFAULT_TASK_LIMIT
@@ -51,8 +56,12 @@ func (c *taskController) GetTasks(ctx echo.Context) error {
 		offset = DEFAULT_TASK_OFFSET
 	}
 
-	tasks, err := c.taskUseCase.GetTasks(limit, offset)
+	tasks, err := c.taskUseCase.GetTasks(uint(companyId), limit, offset)
 	if err != nil {
+		if errors.Is(err, myErrors.ErrNotFound) {
+			return ctx.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
+		}
+
 		slog.Info(fmt.Sprintf("error GetTasks: %v", err))
 		return ctx.JSON(http.StatusInternalServerError, nil)
 	}
@@ -60,15 +69,19 @@ func (c *taskController) GetTasks(ctx echo.Context) error {
 }
 
 func (c *taskController) GetTask(ctx echo.Context) error {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(ctx.Param("task_id"), 10, 64)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, nil)
+		return ctx.JSON(http.StatusBadRequest, nil)
+	}
+	companyId, err := strconv.ParseUint(ctx.Param("company_id"), 10, 64)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, nil)
 	}
 
-	task, err := c.taskUseCase.GetTask(uint(id))
+	task, err := c.taskUseCase.GetTask(uint(id), uint(companyId))
 	if err != nil {
 		if errors.Is(err, myErrors.ErrNotFound) {
-			return ctx.JSON(http.StatusNotFound, map[string]string{"error": "Task is not found"})
+			return ctx.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
 		}
 
 		slog.Info(fmt.Sprintf("error GetTask: %v", err))
@@ -88,7 +101,7 @@ func (c *taskController) CreateTask(ctx echo.Context) error {
 }
 
 func (c *taskController) UpdateTask(ctx echo.Context) error {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(ctx.Param("task_id"), 10, 64)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, nil)
 	}
@@ -102,7 +115,7 @@ func (c *taskController) UpdateTask(ctx echo.Context) error {
 }
 
 func (c *taskController) DeleteTask(ctx echo.Context) error {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	id, err := strconv.ParseUint(ctx.Param("task_id"), 10, 64)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, nil)
 	}
