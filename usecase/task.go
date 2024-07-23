@@ -10,7 +10,7 @@ type TaskUseCase interface {
 	GetTask(companyId, taskId uint) (*model.Task, error)
 	CreateTask(task *model.Task) (*model.Task, error)
 	UpdateTask(companyId, taskId uint, task *model.Task) (*model.Task, error)
-	DeleteTask(id uint) error
+	DeleteTask(companyId, taskId uint) error
 }
 
 type taskUseCase struct {
@@ -97,6 +97,16 @@ func (u *taskUseCase) UpdateTask(companyId, taskId uint, task *model.Task) (*mod
 	return resultTask, nil
 }
 
-func (u *taskUseCase) DeleteTask(id uint) error {
+func (u *taskUseCase) DeleteTask(companyId, taskId uint) error {
+	_, err := u.taskRepository.GetTask(companyId, taskId)
+	if err != nil {
+		return err
+	}
+
+	err = u.taskRepository.DeleteTask(companyId, taskId)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

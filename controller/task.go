@@ -82,7 +82,7 @@ func (c *taskController) GetTask(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, nil)
 	}
 
-	task, err := c.taskUseCase.GetTask(uint(id), uint(companyId))
+	task, err := c.taskUseCase.GetTask(uint(companyId), uint(id))
 	if err != nil {
 		if errors.Is(err, myErrors.ErrNotFound) {
 			return ctx.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
@@ -155,12 +155,17 @@ func (c *taskController) UpdateTask(ctx echo.Context) error {
 }
 
 func (c *taskController) DeleteTask(ctx echo.Context) error {
-	id, err := strconv.ParseUint(ctx.Param("task_id"), 10, 64)
+	taskId, err := strconv.ParseUint(ctx.Param("task_id"), 10, 64)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, nil)
 	}
 
-	err = c.taskUseCase.DeleteTask(uint(id))
+	companyId, err := strconv.ParseUint(ctx.Param("company_id"), 10, 64)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, nil)
+	}
+
+	err = c.taskUseCase.DeleteTask(uint(companyId), uint(taskId))
 	if err != nil {
 		if errors.Is(err, myErrors.ErrNotFound) {
 			return ctx.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
