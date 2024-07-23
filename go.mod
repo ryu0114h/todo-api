@@ -7,6 +7,7 @@ require (
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/mock v0.4.0
+	golang.org/x/crypto v0.25.0
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.7
 )
@@ -26,9 +27,8 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
-	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/net v0.24.0 // indirect
-	golang.org/x/sys v0.19.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
+	golang.org/x/sys v0.22.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
