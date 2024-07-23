@@ -123,7 +123,7 @@ func (c *taskController) CreateTask(ctx echo.Context) error {
 func (c *taskController) UpdateTask(ctx echo.Context) error {
 	taskId, err := strconv.ParseUint(ctx.Param("task_id"), 10, 64)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, nil)
+		return ctx.JSON(http.StatusBadRequest, nil)
 	}
 
 	companyId, err := strconv.ParseUint(ctx.Param("company_id"), 10, 64)

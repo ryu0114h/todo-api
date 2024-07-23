@@ -168,9 +168,26 @@ func NewCreateTaskResponseBody(task *model.Task) *CreateTaskResponseBody {
 	}
 }
 
-func NewUpdateTaskResponseBody(task *model.Task) *CreateTaskResponseBody {
-	return &CreateTaskResponseBody{
-		Task: &CreateTaskResponseBodyTask{
+type UpdateTaskResponseBody struct {
+	Task *UpdateTaskResponseBodyTask `json:"task"`
+}
+
+type UpdateTaskResponseBodyTask struct {
+	ID          uint       `json:"id"`
+	CompanyID   uint       `json:"company_id"`
+	AssigneeID  *uint      `json:"assignee_id"`
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	DueDate     *time.Time `json:"due_date"`
+	Visibility  string     `json:"visibility"`
+	Status      string     `json:"status"`
+	CreatedAt   *time.Time `json:"created_at"`
+	UpdatedAt   *time.Time `json:"updated_at"`
+}
+
+func NewUpdateTaskResponseBody(task *model.Task) *UpdateTaskResponseBody {
+	return &UpdateTaskResponseBody{
+		Task: &UpdateTaskResponseBodyTask{
 			ID:          task.ID,
 			CompanyID:   task.CompanyID,
 			AssigneeID:  task.AssigneeID,
