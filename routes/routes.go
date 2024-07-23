@@ -16,9 +16,11 @@ func RegisterRoutes(e *echo.Echo, db *gorm.DB) {
 	companyUserRepository := repository.NewCompanyUserRepository(db)
 	taskUseCase := usecase.NewTaskUseCase(taskRepository, companyRepository, companyUserRepository)
 	taskController := controller.NewTaskController(taskUseCase)
+	userController := controller.NewUserController()
 
 	apiV1 := e.Group("/api/v1")
 	apiV1.Use(middleware.Logging())
+	apiV1.POST("/users", userController.CreateUser)
 	apiV1.GET("/companies/:company_id/tasks", taskController.GetTasks)
 	apiV1.GET("/companies/:company_id/tasks/:task_id", taskController.GetTask)
 	apiV1.POST("/companies/:company_id/tasks", taskController.CreateTask)
