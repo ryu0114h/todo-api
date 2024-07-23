@@ -5,6 +5,6 @@ import "time"
 type Company struct {
 	ID        uint
 	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	CreatedAt *time.Time
+	UpdatedAt *time.Time
 }

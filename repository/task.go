@@ -13,6 +13,7 @@ type TaskRepository interface {
 	GetTasks(companyId uint, limit, offset int) ([]*model.Task, error)
 	GetTask(id, companyId uint) (*model.Task, error)
 	CreateTask(task *model.Task) (*model.Task, error)
+	UpdateTask(id uint, task *model.Task) (*model.Task, error)
 }
 
 type taskRepository struct {
@@ -48,6 +49,14 @@ func (r *taskRepository) GetTask(id, companyId uint) (*model.Task, error) {
 
 func (r *taskRepository) CreateTask(task *model.Task) (*model.Task, error) {
 	if err := r.db.Create(task).Error; err != nil {
+		return nil, myErrors.ErrDb
+	}
+	return task, nil
+}
+
+func (r *taskRepository) UpdateTask(id uint, task *model.Task) (*model.Task, error) {
+	result := r.db.Save(task)
+	if err := result.Error; err != nil {
 		return nil, myErrors.ErrDb
 	}
 	return task, nil
