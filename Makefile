@@ -29,3 +29,27 @@ migrate-force:
 .PHONY: create-migrate-file
 create-migrate-file:
 	migrate create -ext sql -dir db/migrations -seq ${tableName}
+
+# モックの生成
+.PHONY: gen-mock
+gen-mock:
+	@rm -rf mock/$(MOCK_DIR)/*.go
+	@for r in $$(find $(MOCK_DIR) -type f -name '*.go' ! -name '*_test.go' -exec basename {} \;); do \
+		echo "mockgen -source $(MOCK_DIR)/$$r -destination mock/$(MOCK_DIR)/$$r"; \
+		mockgen -source $(MOCK_DIR)/$$r -destination mock/$(MOCK_DIR)/$$r; \
+	done
+
+# usecaseのモックの生成
+.PHONY: gen-mock-usecase
+gen-mock-usecase:
+	@make gen-mock MOCK_DIR=usecase
+
+# usecaseのモックの生成
+.PHONY: gen-mock-repository
+gen-mock-repository:
+	@make gen-mock MOCK_DIR=repository
+
+# テスト
+.PHONY: test
+test:
+	go test -race ./...
