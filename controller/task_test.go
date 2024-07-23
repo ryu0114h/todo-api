@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -296,6 +297,91 @@ func TestTaskController_GetTask(t *testing.T) {
 			if assert.NoError(t, taskController.GetTask(ctx)) {
 				assert.Equal(t, tc.expectedStatus, rec.Code)
 
+				if tc.expectedBody != nil {
+					expectedJSON, _ := json.Marshal(tc.expectedBody)
+					assert.JSONEq(t, string(expectedJSON), rec.Body.String())
+				}
+			}
+		})
+	}
+}
+
+func TestTaskController_CreateTask(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUseCase := mock_usecase.NewMockTaskUseCase(ctrl)
+	taskController := NewTaskController(mockUseCase)
+
+	testCases := []struct {
+		name           string
+		companyID      string
+		requestBody    string
+		mockFunc       func()
+		expectedStatus int
+		expectedBody   interface{}
+	}{
+		{
+			name:        "Success",
+			companyID:   "1",
+			requestBody: `{"title": "New Task", "description": "New task description", "visibility": "company", "status": "pending"}`,
+			mockFunc: func() {
+				task := &model.Task{
+					ID:          1,
+					CompanyID:   1,
+					Title:       "New Task",
+					Description: "New task description",
+					Visibility:  "company",
+					Status:      "pending",
+				}
+				mockUseCase.EXPECT().CreateTask(gomock.Any()).Return(task, nil).Times(1)
+			},
+			expectedStatus: http.StatusCreated,
+			expectedBody: &response.CreateTaskResponseBody{
+				Task: &response.CreateTaskResponseBodyTask{
+					ID:          1,
+					CompanyID:   1,
+					Title:       "New Task",
+					Description: "New task description",
+					Visibility:  "company",
+					Status:      "pending",
+				},
+			},
+		},
+		{
+			name:           "Invalid company ID",
+			companyID:      "invalid",
+			requestBody:    `{"title": "New Task", "description": "New task description", "visibility": "company", "status": "pending"}`,
+			mockFunc:       func() {},
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   nil,
+		},
+		{
+			name:        "Internal server error",
+			companyID:   "1",
+			requestBody: `{"title": "New Task", "description": "New task description", "visibility": "company", "status": "pending"}`,
+			mockFunc: func() {
+				mockUseCase.EXPECT().CreateTask(gomock.Any()).Return(nil, errors.New("some error")).Times(1)
+			},
+			expectedStatus: http.StatusInternalServerError,
+			expectedBody:   map[string]string{"error": "Failed to create task"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest(http.MethodPost, "/api/v1/companies/"+tc.companyID+"/tasks", strings.NewReader(tc.requestBody))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			ctx := e.NewContext(req, rec)
+			ctx.SetParamNames("company_id")
+			ctx.SetParamValues(tc.companyID)
+
+			tc.mockFunc()
+
+			if assert.NoError(t, taskController.CreateTask(ctx)) {
+				assert.Equal(t, tc.expectedStatus, rec.Code)
 				if tc.expectedBody != nil {
 					expectedJSON, _ := json.Marshal(tc.expectedBody)
 					assert.JSONEq(t, string(expectedJSON), rec.Body.String())
