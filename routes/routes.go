@@ -6,17 +6,21 @@ import (
 	"todo-api/repository"
 	"todo-api/usecase"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
 func RegisterRoutes(e *echo.Echo, db *gorm.DB) {
+	var validate = validator.New()
 	taskRepository := repository.NewTaskRepository(db)
 	companyRepository := repository.NewCompanyRepository(db)
 	companyUserRepository := repository.NewCompanyUserRepository(db)
+	userRepository := repository.NewUserRepository(db)
 	taskUseCase := usecase.NewTaskUseCase(taskRepository, companyRepository, companyUserRepository)
-	taskController := controller.NewTaskController(taskUseCase)
-	userController := controller.NewUserController()
+	userUseCase := usecase.NewUserUseCase(db, userRepository, companyUserRepository)
+	taskController := controller.NewTaskController(validate, taskUseCase)
+	userController := controller.NewUserController(validate, userUseCase)
 
 	apiV1 := e.Group("/api/v1")
 	apiV1.Use(middleware.Logging())

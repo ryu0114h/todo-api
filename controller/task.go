@@ -24,8 +24,6 @@ const (
 	DEFAULT_TASK_OFFSET = 0
 )
 
-var validate = validator.New()
-
 type TaskController interface {
 	GetTasks(ctx echo.Context) error
 	GetTask(ctx echo.Context) error
@@ -35,11 +33,15 @@ type TaskController interface {
 }
 
 type taskController struct {
+	validate    *validator.Validate
 	taskUseCase usecase.TaskUseCase
 }
 
-func NewTaskController(taskUseCase usecase.TaskUseCase) TaskController {
-	return &taskController{taskUseCase: taskUseCase}
+func NewTaskController(validate *validator.Validate, taskUseCase usecase.TaskUseCase) TaskController {
+	return &taskController{
+		validate:    validate,
+		taskUseCase: taskUseCase,
+	}
 }
 
 func (c *taskController) GetTasks(ctx echo.Context) error {
@@ -107,7 +109,7 @@ func (c *taskController) CreateTask(ctx echo.Context) error {
 	}
 
 	// Validation
-	if err := validate.Struct(requestBody); err != nil {
+	if err := c.validate.Struct(requestBody); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
@@ -137,7 +139,7 @@ func (c *taskController) UpdateTask(ctx echo.Context) error {
 	}
 
 	// Validation
-	if err := validate.Struct(requestBody); err != nil {
+	if err := c.validate.Struct(requestBody); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 

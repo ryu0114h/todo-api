@@ -133,7 +133,7 @@ func NewGetTaskResponseBodyAssignee(assignee *model.User) *GetTaskResponseBodyAs
 	}
 }
 
-// CreateTaskResponseBody はタスク取得APIのレスポンスボディ
+// CreateTaskResponseBody はタスク作成APIのレスポンスボディ
 type CreateTaskResponseBody struct {
 	Task *CreateTaskResponseBodyTask `json:"task"`
 }
@@ -168,6 +168,7 @@ func NewCreateTaskResponseBody(task *model.Task) *CreateTaskResponseBody {
 	}
 }
 
+// CreateTaskResponseBody はタスク更新APIのレスポンスボディ
 type UpdateTaskResponseBody struct {
 	Task *UpdateTaskResponseBodyTask `json:"task"`
 }
