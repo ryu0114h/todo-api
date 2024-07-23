@@ -47,7 +47,11 @@ func (u *taskUseCase) GetTask(id, companyId uint) (*model.Task, error) {
 }
 
 func (u *taskUseCase) CreateTask(task *model.Task) (*model.Task, error) {
-	return nil, nil
+	task, err := u.taskRepository.CreateTask(task)
+	if err != nil {
+		return nil, err
+	}
+	return task, nil
 }
 
 func (u *taskUseCase) UpdateTask(id uint, task *model.Task) (*model.Task, error) {

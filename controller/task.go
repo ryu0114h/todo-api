@@ -6,10 +6,13 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
+	"todo-api/controller/request"
 	"todo-api/controller/response"
 	myErrors "todo-api/errors"
 	"todo-api/model"
 	"todo-api/usecase"
+
+	"github.com/go-playground/validator/v10"
 
 	"github.com/labstack/echo/v4"
 )
@@ -21,6 +24,8 @@ const (
 	// タスクのデフォルトのオフセット値
 	DEFAULT_TASK_OFFSET = 0
 )
+
+var validate = validator.New()
 
 type TaskController interface {
 	GetTasks(ctx echo.Context) error
@@ -92,12 +97,29 @@ func (c *taskController) GetTask(ctx echo.Context) error {
 }
 
 func (c *taskController) CreateTask(ctx echo.Context) error {
-	task, err := c.taskUseCase.CreateTask(&model.Task{})
+	companyId, err := strconv.ParseUint(ctx.Param("company_id"), 10, 64)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, nil)
+	}
+
+	requestBody := &request.CreateTaskRequestBody{}
+	if err := ctx.Bind(requestBody); err != nil {
+		return err
+	}
+
+	// Validation
+	// TODO: assignee_idのValidation
+	if err := validate.Struct(requestBody); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+
+	task := request.NewTaskFromCreateTaskRequestBody(uint(companyId), requestBody)
+	task, err = c.taskUseCase.CreateTask(task)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, nil)
 	}
 
-	return ctx.JSON(http.StatusCreated, task)
+	return ctx.JSON(http.StatusCreated, response.NewGetTaskResponseBody(task))
 }
 
 func (c *taskController) UpdateTask(ctx echo.Context) error {
