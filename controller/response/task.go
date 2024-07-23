@@ -12,6 +12,7 @@ type GetTasksResponseBody struct {
 
 type GetTasksResponseBodyTask struct {
 	ID          uint                          `json:"id"`
+	CompanyID   uint                          `json:"company_id"`
 	Title       string                        `json:"title"`
 	Description string                        `json:"description"`
 	DueDate     *time.Time                    `json:"due_date"`
@@ -38,6 +39,7 @@ func NewGetTasksResponseBody(tasks []*model.Task) *GetTasksResponseBody {
 	for _, task := range tasks {
 		resTasks = append(resTasks, &GetTasksResponseBodyTask{
 			ID:          task.ID,
+			CompanyID:   task.CompanyID,
 			Title:       task.Title,
 			Description: task.Description,
 			DueDate:     task.DueDate,
@@ -77,6 +79,7 @@ type GetTaskResponseBody struct {
 
 type GetTaskResponseBodyTask struct {
 	ID          uint                          `json:"id"`
+	CompanyID   uint                          `json:"company_id"`
 	Title       string                        `json:"title"`
 	Description string                        `json:"description"`
 	DueDate     *time.Time                    `json:"due_date"`
@@ -91,6 +94,7 @@ func NewGetTaskResponseBody(task *model.Task) *GetTaskResponseBody {
 	return &GetTaskResponseBody{
 		Task: &GetTaskResponseBodyTask{
 			ID:          task.ID,
+			CompanyID:   task.CompanyID,
 			Title:       task.Title,
 			Description: task.Description,
 			DueDate:     task.DueDate,

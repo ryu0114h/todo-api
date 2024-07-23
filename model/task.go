@@ -4,6 +4,7 @@ import "time"
 
 type Task struct {
 	ID          uint
+	CompanyID   uint
 	Title       string
 	Description string
 	DueDate     *time.Time
