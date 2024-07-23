@@ -139,26 +139,16 @@ type CreateTaskResponseBody struct {
 }
 
 type CreateTaskResponseBodyTask struct {
-	ID          uint                            `json:"id"`
-	CompanyID   uint                            `json:"company_id"`
-	Title       string                          `json:"title"`
-	Description string                          `json:"description"`
-	DueDate     *time.Time                      `json:"due_date"`
-	Visibility  string                          `json:"visibility"`
-	Status      string                          `json:"status"`
-	CreatedAt   time.Time                       `json:"created_at"`
-	UpdatedAt   time.Time                       `json:"updated_at"`
-	Assignee    *CreateTaskResponseBodyAssignee `json:"assignee"`
-}
-
-type CreateTaskResponseBodyAssignee struct {
-	ID           uint      `json:"id"`
-	Username     string    `json:"username"`
-	Email        string    `json:"email"`
-	PasswordHash string    `json:"password_hash"`
-	Role         string    `json:"role"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID          uint       `json:"id"`
+	CompanyID   uint       `json:"company_id"`
+	AssigneeID  *uint      `json:"assignee_id"`
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	DueDate     *time.Time `json:"due_date"`
+	Visibility  string     `json:"visibility"`
+	Status      string     `json:"status"`
+	CreatedAt   time.Time  `json:"created_at"`
+	UpdatedAt   time.Time  `json:"updated_at"`
 }
 
 func NewCreateTaskResponseBody(task *model.Task) *CreateTaskResponseBody {
@@ -166,6 +156,7 @@ func NewCreateTaskResponseBody(task *model.Task) *CreateTaskResponseBody {
 		Task: &CreateTaskResponseBodyTask{
 			ID:          task.ID,
 			CompanyID:   task.CompanyID,
+			AssigneeID:  task.AssigneeID,
 			Title:       task.Title,
 			Description: task.Description,
 			DueDate:     task.DueDate,
@@ -173,23 +164,6 @@ func NewCreateTaskResponseBody(task *model.Task) *CreateTaskResponseBody {
 			Status:      task.Status,
 			CreatedAt:   task.CreatedAt,
 			UpdatedAt:   task.UpdatedAt,
-			Assignee:    NewCreateTaskResponseBodyAssignee(task.Assignee),
 		},
-	}
-}
-
-func NewCreateTaskResponseBodyAssignee(assignee *model.User) *CreateTaskResponseBodyAssignee {
-	if assignee == nil {
-		return nil
-	}
-
-	return &CreateTaskResponseBodyAssignee{
-		ID:           assignee.ID,
-		Username:     assignee.Username,
-		Email:        assignee.Email,
-		PasswordHash: assignee.PasswordHash,
-		Role:         assignee.Role,
-		CreatedAt:    assignee.CreatedAt,
-		UpdatedAt:    assignee.UpdatedAt,
 	}
 }

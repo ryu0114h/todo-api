@@ -14,14 +14,20 @@ type TaskUseCase interface {
 }
 
 type taskUseCase struct {
-	taskRepository    repository.TaskRepository
-	companyRepository repository.CompanyRepository
+	taskRepository        repository.TaskRepository
+	companyRepository     repository.CompanyRepository
+	companyUserRepository repository.CompanyUserRepository
 }
 
-func NewTaskUseCase(taskRepository repository.TaskRepository, companyRepository repository.CompanyRepository) TaskUseCase {
+func NewTaskUseCase(
+	taskRepository repository.TaskRepository,
+	companyRepository repository.CompanyRepository,
+	companyUserRepository repository.CompanyUserRepository,
+) TaskUseCase {
 	return &taskUseCase{
-		taskRepository:    taskRepository,
-		companyRepository: companyRepository,
+		taskRepository:        taskRepository,
+		companyRepository:     companyRepository,
+		companyUserRepository: companyUserRepository,
 	}
 }
 
@@ -47,6 +53,13 @@ func (u *taskUseCase) GetTask(id, companyId uint) (*model.Task, error) {
 }
 
 func (u *taskUseCase) CreateTask(task *model.Task) (*model.Task, error) {
+	if task.AssigneeID != nil {
+		_, err := u.companyUserRepository.GetCompanyUser(task.CompanyID, *task.AssigneeID)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	task, err := u.taskRepository.CreateTask(task)
 	if err != nil {
 		return nil, err
