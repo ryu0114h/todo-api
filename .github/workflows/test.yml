@@ -1,0 +1,22 @@
+name: Test CI
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.22
+
+      - name: Download Go modules
+        run: go mod download
+
+      - name: Run tests
+        run: make test
