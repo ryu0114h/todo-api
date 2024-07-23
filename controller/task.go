@@ -116,10 +116,10 @@ func (c *taskController) CreateTask(ctx echo.Context) error {
 	task := request.NewTaskFromCreateTaskRequestBody(uint(companyId), requestBody)
 	task, err = c.taskUseCase.CreateTask(task)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, nil)
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create task"})
 	}
 
-	return ctx.JSON(http.StatusCreated, response.NewGetTaskResponseBody(task))
+	return ctx.JSON(http.StatusCreated, response.NewCreateTaskResponseBody(task))
 }
 
 func (c *taskController) UpdateTask(ctx echo.Context) error {

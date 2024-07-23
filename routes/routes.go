@@ -12,7 +12,8 @@ import (
 func RegisterRoutes(e *echo.Echo, db *gorm.DB) {
 	taskRepository := repository.NewTaskRepository(db)
 	companyRepository := repository.NewCompanyRepository(db)
-	taskUseCase := usecase.NewTaskUseCase(taskRepository, companyRepository)
+	companyUserRepository := repository.NewCompanyUserRepository(db)
+	taskUseCase := usecase.NewTaskUseCase(taskRepository, companyRepository, companyUserRepository)
 	taskController := controller.NewTaskController(taskUseCase)
 
 	apiV1 := e.Group("/api/v1")
