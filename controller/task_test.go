@@ -568,3 +568,88 @@ func TestTaskController_UpdateTask(t *testing.T) {
 		})
 	}
 }
+
+func TestTaskController_DeleteTask(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockUseCase := mock_usecase.NewMockTaskUseCase(ctrl)
+	taskController := NewTaskController(mockUseCase)
+
+	testCases := []struct {
+		name           string
+		companyID      string
+		taskID         string
+		mockFunc       func()
+		expectedStatus int
+		expectedBody   interface{}
+	}{
+		{
+			name:      "Success",
+			companyID: "1",
+			taskID:    "1",
+			mockFunc: func() {
+				mockUseCase.EXPECT().DeleteTask(uint(1), uint(1)).Return(nil).Times(1)
+			},
+			expectedStatus: http.StatusOK,
+			expectedBody:   nil,
+		},
+		{
+			name:           "Invalid task ID",
+			companyID:      "1",
+			taskID:         "invalid",
+			mockFunc:       func() {},
+			expectedStatus: http.StatusInternalServerError,
+			expectedBody:   nil,
+		},
+		{
+			name:           "Invalid company ID",
+			companyID:      "invalid",
+			taskID:         "1",
+			mockFunc:       func() {},
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   nil,
+		},
+		{
+			name:      "Not found",
+			companyID: "1",
+			taskID:    "1",
+			mockFunc: func() {
+				mockUseCase.EXPECT().DeleteTask(uint(1), uint(1)).Return(myErrors.ErrNotFound).Times(1)
+			},
+			expectedStatus: http.StatusNotFound,
+			expectedBody:   map[string]string{"error": "not found"},
+		},
+		{
+			name:      "Internal server error",
+			companyID: "1",
+			taskID:    "1",
+			mockFunc: func() {
+				mockUseCase.EXPECT().DeleteTask(uint(1), uint(1)).Return(errors.New("internal error")).Times(1)
+			},
+			expectedStatus: http.StatusInternalServerError,
+			expectedBody:   nil,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest(http.MethodDelete, "/api/v1/companies/"+tc.companyID+"/tasks/"+tc.taskID, nil)
+			rec := httptest.NewRecorder()
+			ctx := e.NewContext(req, rec)
+			ctx.SetParamNames("company_id", "task_id")
+			ctx.SetParamValues(tc.companyID, tc.taskID)
+
+			tc.mockFunc()
+
+			if assert.NoError(t, taskController.DeleteTask(ctx)) {
+				assert.Equal(t, tc.expectedStatus, rec.Code)
+				if tc.expectedBody != nil {
+					expectedJSON, _ := json.Marshal(tc.expectedBody)
+					assert.JSONEq(t, string(expectedJSON), rec.Body.String())
+				}
+			}
+		})
+	}
+}
