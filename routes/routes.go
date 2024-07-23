@@ -2,6 +2,7 @@ package routes
 
 import (
 	controller "todo-api/controller"
+	"todo-api/middleware"
 	"todo-api/repository"
 	"todo-api/usecase"
 
@@ -17,6 +18,7 @@ func RegisterRoutes(e *echo.Echo, db *gorm.DB) {
 	taskController := controller.NewTaskController(taskUseCase)
 
 	apiV1 := e.Group("/api/v1")
+	apiV1.Use(middleware.Logging())
 	apiV1.GET("/companies/:company_id/tasks", taskController.GetTasks)
 	apiV1.GET("/companies/:company_id/tasks/:task_id", taskController.GetTask)
 	apiV1.POST("/companies/:company_id/tasks", taskController.CreateTask)
