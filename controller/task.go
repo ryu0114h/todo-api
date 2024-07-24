@@ -95,6 +95,12 @@ func (c *taskController) GetTasks(ctx echo.Context) error {
 	if err != nil {
 		limit = DEFAULT_TASK_LIMIT
 	}
+	// リミットが最大許容値を超えないようにする
+	if limit > MAX_TASK_LIMIT {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{
+			"error": fmt.Sprintf("Limit exceeds the maximum allowed value of %d", MAX_TASK_LIMIT),
+		})
+	}
 	offset, err := strconv.Atoi(offsetStr)
 	if err != nil {
 		offset = DEFAULT_TASK_OFFSET
