@@ -28,9 +28,22 @@ func RegisterRoutes(e *echo.Echo, db *gorm.DB) {
 	apiV1.Use(middleware.Logging())
 	apiV1.POST("/users", userController.CreateUser)
 	apiV1.POST("/login", authController.Login)
-	apiV1.GET("/companies/:company_id/tasks", taskController.GetTasks)
-	apiV1.GET("/companies/:company_id/tasks/:task_id", taskController.GetTask)
-	apiV1.POST("/companies/:company_id/tasks", taskController.CreateTask)
-	apiV1.PUT("/companies/:company_id/tasks/:task_id", taskController.UpdateTask)
-	apiV1.DELETE("/companies/:company_id/tasks/:task_id", taskController.DeleteTask)
+
+	// 下記は認証が必要なAPI
+	apiV1.Use(middleware.Auth(userRepository))
+	apiV1Company := apiV1.Group("/companies/:company_id")
+	apiV1Company.Use(middleware.CompanyAuth(companyUserRepository))
+	apiV1Company.GET("/tasks", taskController.GetTasks)
+	apiV1Company.GET("/tasks/:task_id", taskController.GetTask)
+	apiV1Company.POST("/tasks", taskController.CreateTask)
+	apiV1Company.PUT("/tasks/:task_id", taskController.UpdateTask)
+	apiV1Company.DELETE("/tasks/:task_id", taskController.DeleteTask)
+
+	// 下記はAdminユーザ専用のAPI
+	apiV1Admin := apiV1.Group("/admin")
+	apiV1Admin.Use(middleware.AdminAuth())
+	apiV1Admin.GET("/tasks", taskController.GetTasksByAdmin)
+	apiV1Admin.POST("/tasks", taskController.CreateTaskByAdmin)
+	apiV1Admin.PUT("/tasks/:task_id", taskController.UpdateTaskByAdmin)
+	apiV1Admin.DELETE("/tasks/:task_id", taskController.DeleteTaskByAdmin)
 }

@@ -2,10 +2,13 @@ package controller
 
 import (
 	"net/http"
+	"os"
+	"time"
 	"todo-api/controller/request"
 	"todo-api/controller/response"
 	"todo-api/usecase"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
@@ -37,7 +40,7 @@ func (c *authController) Login(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	createdAuth, err := c.authUseCase.Login(
+	loginUser, err := c.authUseCase.Login(
 		requestBody.Username,
 		requestBody.Password,
 	)
@@ -45,5 +48,20 @@ func (c *authController) Login(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "could not create auth"})
 	}
 
-	return ctx.JSON(http.StatusCreated, response.NewLoginResponseBody(createdAuth))
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":  loginUser.ID,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "JWT Secret not found"})
+	}
+
+	tokenString, err := token.SignedString([]byte(jwtSecret))
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Error while generating token"})
+	}
+
+	return ctx.JSON(http.StatusOK, response.NewLoginResponseBody(tokenString))
 }

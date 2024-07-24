@@ -21,7 +21,7 @@ func NewAuthUseCase(userRepository repository.UserRepository) AuthUseCase {
 }
 
 func (a *authUseCase) Login(username, password string) (*model.User, error) {
-	user, err := a.userRepository.GetByUsername(username)
+	user, err := a.userRepository.GetUserByUsername(username)
 	if err != nil {
 		return nil, err
 	}
