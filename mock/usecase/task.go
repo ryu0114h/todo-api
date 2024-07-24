@@ -54,6 +54,21 @@ func (mr *MockTaskUseCaseMockRecorder) CreateTask(task any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTask", reflect.TypeOf((*MockTaskUseCase)(nil).CreateTask), task)
 }
 
+// CreateTaskByAdmin mocks base method.
+func (m *MockTaskUseCase) CreateTaskByAdmin(task *model.Task) (*model.Task, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateTaskByAdmin", task)
+	ret0, _ := ret[0].(*model.Task)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateTaskByAdmin indicates an expected call of CreateTaskByAdmin.
+func (mr *MockTaskUseCaseMockRecorder) CreateTaskByAdmin(task any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateTaskByAdmin", reflect.TypeOf((*MockTaskUseCase)(nil).CreateTaskByAdmin), task)
+}
+
 // DeleteTask mocks base method.
 func (m *MockTaskUseCase) DeleteTask(companyId, taskId uint) error {
 	m.ctrl.T.Helper()
@@ -66,6 +81,20 @@ func (m *MockTaskUseCase) DeleteTask(companyId, taskId uint) error {
 func (mr *MockTaskUseCaseMockRecorder) DeleteTask(companyId, taskId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTask", reflect.TypeOf((*MockTaskUseCase)(nil).DeleteTask), companyId, taskId)
+}
+
+// DeleteTaskByAdmin mocks base method.
+func (m *MockTaskUseCase) DeleteTaskByAdmin(taskId uint) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteTaskByAdmin", taskId)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteTaskByAdmin indicates an expected call of DeleteTaskByAdmin.
+func (mr *MockTaskUseCaseMockRecorder) DeleteTaskByAdmin(taskId any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTaskByAdmin", reflect.TypeOf((*MockTaskUseCase)(nil).DeleteTaskByAdmin), taskId)
 }
 
 // GetTask mocks base method.
@@ -84,18 +113,33 @@ func (mr *MockTaskUseCaseMockRecorder) GetTask(companyId, taskId any) *gomock.Ca
 }
 
 // GetTasks mocks base method.
-func (m *MockTaskUseCase) GetTasks(companyId uint, limit, offset int) ([]*model.Task, error) {
+func (m *MockTaskUseCase) GetTasks(limit, offset int) ([]*model.Task, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTasks", companyId, limit, offset)
+	ret := m.ctrl.Call(m, "GetTasks", limit, offset)
 	ret0, _ := ret[0].([]*model.Task)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTasks indicates an expected call of GetTasks.
-func (mr *MockTaskUseCaseMockRecorder) GetTasks(companyId, limit, offset any) *gomock.Call {
+func (mr *MockTaskUseCaseMockRecorder) GetTasks(limit, offset any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTasks", reflect.TypeOf((*MockTaskUseCase)(nil).GetTasks), companyId, limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTasks", reflect.TypeOf((*MockTaskUseCase)(nil).GetTasks), limit, offset)
+}
+
+// GetTasksByCompanyId mocks base method.
+func (m *MockTaskUseCase) GetTasksByCompanyId(companyId uint, limit, offset int) ([]*model.Task, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTasksByCompanyId", companyId, limit, offset)
+	ret0, _ := ret[0].([]*model.Task)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTasksByCompanyId indicates an expected call of GetTasksByCompanyId.
+func (mr *MockTaskUseCaseMockRecorder) GetTasksByCompanyId(companyId, limit, offset any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTasksByCompanyId", reflect.TypeOf((*MockTaskUseCase)(nil).GetTasksByCompanyId), companyId, limit, offset)
 }
 
 // UpdateTask mocks base method.
@@ -111,4 +155,19 @@ func (m *MockTaskUseCase) UpdateTask(companyId, taskId uint, task *model.Task) (
 func (mr *MockTaskUseCaseMockRecorder) UpdateTask(companyId, taskId, task any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTask", reflect.TypeOf((*MockTaskUseCase)(nil).UpdateTask), companyId, taskId, task)
+}
+
+// UpdateTaskByAdmin mocks base method.
+func (m *MockTaskUseCase) UpdateTaskByAdmin(taskId uint, task *model.Task) (*model.Task, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateTaskByAdmin", taskId, task)
+	ret0, _ := ret[0].(*model.Task)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateTaskByAdmin indicates an expected call of UpdateTaskByAdmin.
+func (mr *MockTaskUseCaseMockRecorder) UpdateTaskByAdmin(taskId, task any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateTaskByAdmin", reflect.TypeOf((*MockTaskUseCase)(nil).UpdateTaskByAdmin), taskId, task)
 }
