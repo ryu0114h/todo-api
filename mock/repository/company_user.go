@@ -39,6 +39,21 @@ func (m *MockCompanyUserRepository) EXPECT() *MockCompanyUserRepositoryMockRecor
 	return m.recorder
 }
 
+// CreateCompanyUsers mocks base method.
+func (m *MockCompanyUserRepository) CreateCompanyUsers(companyUsers []*model.CompanyUser) ([]*model.CompanyUser, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateCompanyUsers", companyUsers)
+	ret0, _ := ret[0].([]*model.CompanyUser)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateCompanyUsers indicates an expected call of CreateCompanyUsers.
+func (mr *MockCompanyUserRepositoryMockRecorder) CreateCompanyUsers(companyUsers any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCompanyUsers", reflect.TypeOf((*MockCompanyUserRepository)(nil).CreateCompanyUsers), companyUsers)
+}
+
 // GetCompanyUser mocks base method.
 func (m *MockCompanyUserRepository) GetCompanyUser(companyId, userId uint) (*model.CompanyUser, error) {
 	m.ctrl.T.Helper()

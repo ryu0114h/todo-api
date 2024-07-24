@@ -68,6 +68,20 @@ func (mr *MockTaskRepositoryMockRecorder) DeleteTask(companyId, id any) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTask", reflect.TypeOf((*MockTaskRepository)(nil).DeleteTask), companyId, id)
 }
 
+// DeleteTaskById mocks base method.
+func (m *MockTaskRepository) DeleteTaskById(id uint) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteTaskById", id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteTaskById indicates an expected call of DeleteTaskById.
+func (mr *MockTaskRepositoryMockRecorder) DeleteTaskById(id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteTaskById", reflect.TypeOf((*MockTaskRepository)(nil).DeleteTaskById), id)
+}
+
 // GetTask mocks base method.
 func (m *MockTaskRepository) GetTask(companyId, id uint) (*model.Task, error) {
 	m.ctrl.T.Helper()
@@ -83,19 +97,49 @@ func (mr *MockTaskRepositoryMockRecorder) GetTask(companyId, id any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTask", reflect.TypeOf((*MockTaskRepository)(nil).GetTask), companyId, id)
 }
 
-// GetTasks mocks base method.
-func (m *MockTaskRepository) GetTasks(companyId uint, limit, offset int) ([]*model.Task, error) {
+// GetTaskById mocks base method.
+func (m *MockTaskRepository) GetTaskById(id uint) (*model.Task, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTasks", companyId, limit, offset)
+	ret := m.ctrl.Call(m, "GetTaskById", id)
+	ret0, _ := ret[0].(*model.Task)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTaskById indicates an expected call of GetTaskById.
+func (mr *MockTaskRepositoryMockRecorder) GetTaskById(id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTaskById", reflect.TypeOf((*MockTaskRepository)(nil).GetTaskById), id)
+}
+
+// GetTasks mocks base method.
+func (m *MockTaskRepository) GetTasks(limit, offset int) ([]*model.Task, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTasks", limit, offset)
 	ret0, _ := ret[0].([]*model.Task)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTasks indicates an expected call of GetTasks.
-func (mr *MockTaskRepositoryMockRecorder) GetTasks(companyId, limit, offset any) *gomock.Call {
+func (mr *MockTaskRepositoryMockRecorder) GetTasks(limit, offset any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTasks", reflect.TypeOf((*MockTaskRepository)(nil).GetTasks), companyId, limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTasks", reflect.TypeOf((*MockTaskRepository)(nil).GetTasks), limit, offset)
+}
+
+// GetTasksByCompanyId mocks base method.
+func (m *MockTaskRepository) GetTasksByCompanyId(companyId uint, limit, offset int) ([]*model.Task, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTasksByCompanyId", companyId, limit, offset)
+	ret0, _ := ret[0].([]*model.Task)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTasksByCompanyId indicates an expected call of GetTasksByCompanyId.
+func (mr *MockTaskRepositoryMockRecorder) GetTasksByCompanyId(companyId, limit, offset any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTasksByCompanyId", reflect.TypeOf((*MockTaskRepository)(nil).GetTasksByCompanyId), companyId, limit, offset)
 }
 
 // UpdateTask mocks base method.

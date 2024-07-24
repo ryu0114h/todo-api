@@ -11,6 +11,7 @@ import (
 
 type CompanyUserRepository interface {
 	GetCompanyUser(companyId, userId uint) (*model.CompanyUser, error)
+	CreateCompanyUsers(companyUsers []*model.CompanyUser) ([]*model.CompanyUser, error)
 }
 
 type companyUserRepository struct {
@@ -32,4 +33,11 @@ func (r *companyUserRepository) GetCompanyUser(companyId, userId uint) (*model.C
 		return nil, myErrors.ErrNotFound
 	}
 	return company, nil
+}
+
+func (r *companyUserRepository) CreateCompanyUsers(companyUsers []*model.CompanyUser) ([]*model.CompanyUser, error) {
+	if err := r.db.Create(companyUsers).Error; err != nil {
+		return nil, myErrors.ErrDb
+	}
+	return companyUsers, nil
 }
