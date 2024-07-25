@@ -14,15 +14,16 @@ type CreateTaskRequestBody struct {
 	Status      string     `json:"status" validate:"required,oneof=pending in_progress done"`
 }
 
-func NewTaskFromCreateTaskRequestBody(companyId uint, requestBody *CreateTaskRequestBody) *model.Task {
+func NewTaskFromCreateTaskRequestBody(companyId uint, createUserId uint, requestBody *CreateTaskRequestBody) *model.Task {
 	return &model.Task{
-		CompanyID:   companyId,
-		Title:       requestBody.Title,
-		Description: requestBody.Description,
-		DueDate:     requestBody.DueDate,
-		AssigneeID:  requestBody.AssigneeID,
-		Visibility:  requestBody.Visibility,
-		Status:      requestBody.Status,
+		CompanyID:    companyId,
+		CreateUserId: createUserId,
+		Title:        requestBody.Title,
+		Description:  requestBody.Description,
+		DueDate:      requestBody.DueDate,
+		AssigneeID:   requestBody.AssigneeID,
+		Visibility:   requestBody.Visibility,
+		Status:       requestBody.Status,
 	}
 }
 
@@ -36,15 +37,16 @@ type CreateTaskByAdminRequestBody struct {
 	Status      string     `json:"status" validate:"required,oneof=pending in_progress done"`
 }
 
-func NewTaskFromCreateTaskByAdminRequestBody(requestBody *CreateTaskByAdminRequestBody) *model.Task {
+func NewTaskFromCreateTaskByAdminRequestBody(createUserId uint, requestBody *CreateTaskByAdminRequestBody) *model.Task {
 	return &model.Task{
-		CompanyID:   requestBody.CompanyId,
-		Title:       requestBody.Title,
-		Description: requestBody.Description,
-		DueDate:     requestBody.DueDate,
-		AssigneeID:  requestBody.AssigneeID,
-		Visibility:  requestBody.Visibility,
-		Status:      requestBody.Status,
+		CompanyID:    requestBody.CompanyId,
+		CreateUserId: createUserId,
+		Title:        requestBody.Title,
+		Description:  requestBody.Description,
+		DueDate:      requestBody.DueDate,
+		AssigneeID:   requestBody.AssigneeID,
+		Visibility:   requestBody.Visibility,
+		Status:       requestBody.Status,
 	}
 }
 
