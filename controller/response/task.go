@@ -11,16 +11,17 @@ type GetTasksResponseBody struct {
 }
 
 type GetTasksResponseBodyTask struct {
-	ID          uint                          `json:"id"`
-	CompanyID   uint                          `json:"company_id"`
-	Title       string                        `json:"title"`
-	Description string                        `json:"description"`
-	DueDate     *time.Time                    `json:"due_date"`
-	Visibility  string                        `json:"visibility"`
-	Status      string                        `json:"status"`
-	CreatedAt   *time.Time                    `json:"created_at"`
-	UpdatedAt   *time.Time                    `json:"updated_at"`
-	Assignee    *GetTasksResponseBodyAssignee `json:"assignee"`
+	ID           uint                          `json:"id"`
+	CompanyID    uint                          `json:"company_id"`
+	CreateUserID uint                          `json:"create_user_id"`
+	Title        string                        `json:"title"`
+	Description  string                        `json:"description"`
+	DueDate      *time.Time                    `json:"due_date"`
+	Visibility   string                        `json:"visibility"`
+	Status       string                        `json:"status"`
+	CreatedAt    *time.Time                    `json:"created_at"`
+	UpdatedAt    *time.Time                    `json:"updated_at"`
+	Assignee     *GetTasksResponseBodyAssignee `json:"assignee"`
 }
 
 type GetTasksResponseBodyAssignee struct {
@@ -38,16 +39,17 @@ func NewGetTasksResponseBody(tasks []*model.Task) *GetTasksResponseBody {
 
 	for _, task := range tasks {
 		resTasks = append(resTasks, &GetTasksResponseBodyTask{
-			ID:          task.ID,
-			CompanyID:   task.CompanyID,
-			Title:       task.Title,
-			Description: task.Description,
-			DueDate:     task.DueDate,
-			Visibility:  task.Visibility,
-			Status:      task.Status,
-			CreatedAt:   task.CreatedAt,
-			UpdatedAt:   task.UpdatedAt,
-			Assignee:    NewGetTasksResponseBodyAssignee(task.Assignee),
+			ID:           task.ID,
+			CompanyID:    task.CompanyID,
+			CreateUserID: task.CreateUserId,
+			Title:        task.Title,
+			Description:  task.Description,
+			DueDate:      task.DueDate,
+			Visibility:   task.Visibility,
+			Status:       task.Status,
+			CreatedAt:    task.CreatedAt,
+			UpdatedAt:    task.UpdatedAt,
+			Assignee:     NewGetTasksResponseBodyAssignee(task.Assignee),
 		})
 	}
 
@@ -78,16 +80,17 @@ type GetTaskResponseBody struct {
 }
 
 type GetTaskResponseBodyTask struct {
-	ID          uint                         `json:"id"`
-	CompanyID   uint                         `json:"company_id"`
-	Title       string                       `json:"title"`
-	Description string                       `json:"description"`
-	DueDate     *time.Time                   `json:"due_date"`
-	Visibility  string                       `json:"visibility"`
-	Status      string                       `json:"status"`
-	CreatedAt   *time.Time                   `json:"created_at"`
-	UpdatedAt   *time.Time                   `json:"updated_at"`
-	Assignee    *GetTaskResponseBodyAssignee `json:"assignee"`
+	ID           uint                         `json:"id"`
+	CompanyID    uint                         `json:"company_id"`
+	CreateUserID uint                         `json:"create_user_id"`
+	Title        string                       `json:"title"`
+	Description  string                       `json:"description"`
+	DueDate      *time.Time                   `json:"due_date"`
+	Visibility   string                       `json:"visibility"`
+	Status       string                       `json:"status"`
+	CreatedAt    *time.Time                   `json:"created_at"`
+	UpdatedAt    *time.Time                   `json:"updated_at"`
+	Assignee     *GetTaskResponseBodyAssignee `json:"assignee"`
 }
 
 type GetTaskResponseBodyAssignee struct {
@@ -103,16 +106,17 @@ type GetTaskResponseBodyAssignee struct {
 func NewGetTaskResponseBody(task *model.Task) *GetTaskResponseBody {
 	return &GetTaskResponseBody{
 		Task: &GetTaskResponseBodyTask{
-			ID:          task.ID,
-			CompanyID:   task.CompanyID,
-			Title:       task.Title,
-			Description: task.Description,
-			DueDate:     task.DueDate,
-			Visibility:  task.Visibility,
-			Status:      task.Status,
-			CreatedAt:   task.CreatedAt,
-			UpdatedAt:   task.UpdatedAt,
-			Assignee:    NewGetTaskResponseBodyAssignee(task.Assignee),
+			ID:           task.ID,
+			CompanyID:    task.CompanyID,
+			CreateUserID: task.CreateUserId,
+			Title:        task.Title,
+			Description:  task.Description,
+			DueDate:      task.DueDate,
+			Visibility:   task.Visibility,
+			Status:       task.Status,
+			CreatedAt:    task.CreatedAt,
+			UpdatedAt:    task.UpdatedAt,
+			Assignee:     NewGetTaskResponseBodyAssignee(task.Assignee),
 		},
 	}
 }
@@ -139,31 +143,33 @@ type CreateTaskResponseBody struct {
 }
 
 type CreateTaskResponseBodyTask struct {
-	ID          uint       `json:"id"`
-	CompanyID   uint       `json:"company_id"`
-	AssigneeID  *uint      `json:"assignee_id"`
-	Title       string     `json:"title"`
-	Description string     `json:"description"`
-	DueDate     *time.Time `json:"due_date"`
-	Visibility  string     `json:"visibility"`
-	Status      string     `json:"status"`
-	CreatedAt   *time.Time `json:"created_at"`
-	UpdatedAt   *time.Time `json:"updated_at"`
+	ID           uint       `json:"id"`
+	CompanyID    uint       `json:"company_id"`
+	CreateUserID uint       `json:"create_user_id"`
+	AssigneeID   *uint      `json:"assignee_id"`
+	Title        string     `json:"title"`
+	Description  string     `json:"description"`
+	DueDate      *time.Time `json:"due_date"`
+	Visibility   string     `json:"visibility"`
+	Status       string     `json:"status"`
+	CreatedAt    *time.Time `json:"created_at"`
+	UpdatedAt    *time.Time `json:"updated_at"`
 }
 
 func NewCreateTaskResponseBody(task *model.Task) *CreateTaskResponseBody {
 	return &CreateTaskResponseBody{
 		Task: &CreateTaskResponseBodyTask{
-			ID:          task.ID,
-			CompanyID:   task.CompanyID,
-			AssigneeID:  task.AssigneeID,
-			Title:       task.Title,
-			Description: task.Description,
-			DueDate:     task.DueDate,
-			Visibility:  task.Visibility,
-			Status:      task.Status,
-			CreatedAt:   task.CreatedAt,
-			UpdatedAt:   task.UpdatedAt,
+			ID:           task.ID,
+			CompanyID:    task.CompanyID,
+			AssigneeID:   task.AssigneeID,
+			CreateUserID: task.CreateUserId,
+			Title:        task.Title,
+			Description:  task.Description,
+			DueDate:      task.DueDate,
+			Visibility:   task.Visibility,
+			Status:       task.Status,
+			CreatedAt:    task.CreatedAt,
+			UpdatedAt:    task.UpdatedAt,
 		},
 	}
 }
@@ -174,31 +180,33 @@ type UpdateTaskResponseBody struct {
 }
 
 type UpdateTaskResponseBodyTask struct {
-	ID          uint       `json:"id"`
-	CompanyID   uint       `json:"company_id"`
-	AssigneeID  *uint      `json:"assignee_id"`
-	Title       string     `json:"title"`
-	Description string     `json:"description"`
-	DueDate     *time.Time `json:"due_date"`
-	Visibility  string     `json:"visibility"`
-	Status      string     `json:"status"`
-	CreatedAt   *time.Time `json:"created_at"`
-	UpdatedAt   *time.Time `json:"updated_at"`
+	ID           uint       `json:"id"`
+	CompanyID    uint       `json:"company_id"`
+	AssigneeID   *uint      `json:"assignee_id"`
+	CreateUserID uint       `json:"create_user_id"`
+	Title        string     `json:"title"`
+	Description  string     `json:"description"`
+	DueDate      *time.Time `json:"due_date"`
+	Visibility   string     `json:"visibility"`
+	Status       string     `json:"status"`
+	CreatedAt    *time.Time `json:"created_at"`
+	UpdatedAt    *time.Time `json:"updated_at"`
 }
 
 func NewUpdateTaskResponseBody(task *model.Task) *UpdateTaskResponseBody {
 	return &UpdateTaskResponseBody{
 		Task: &UpdateTaskResponseBodyTask{
-			ID:          task.ID,
-			CompanyID:   task.CompanyID,
-			AssigneeID:  task.AssigneeID,
-			Title:       task.Title,
-			Description: task.Description,
-			DueDate:     task.DueDate,
-			Visibility:  task.Visibility,
-			Status:      task.Status,
-			CreatedAt:   task.CreatedAt,
-			UpdatedAt:   task.UpdatedAt,
+			ID:           task.ID,
+			CompanyID:    task.CompanyID,
+			AssigneeID:   task.AssigneeID,
+			CreateUserID: task.CreateUserId,
+			Title:        task.Title,
+			Description:  task.Description,
+			DueDate:      task.DueDate,
+			Visibility:   task.Visibility,
+			Status:       task.Status,
+			CreatedAt:    task.CreatedAt,
+			UpdatedAt:    task.UpdatedAt,
 		},
 	}
 }
