@@ -180,7 +180,8 @@ func TestTaskController_GetTasks(t *testing.T) {
 
 	testCases := []struct {
 		name           string
-		companyId      string
+		companyID      string
+		userID         uint
 		limit          string
 		offset         string
 		mockFunc       func()
@@ -189,7 +190,8 @@ func TestTaskController_GetTasks(t *testing.T) {
 	}{
 		{
 			name:      "Success",
-			companyId: "1",
+			companyID: "1",
+			userID:    2,
 			limit:     "10",
 			offset:    "0",
 			mockFunc: func() {
@@ -229,7 +231,7 @@ func TestTaskController_GetTasks(t *testing.T) {
 						Assignee:    nil,
 					},
 				}
-				mockUseCase.EXPECT().GetTasksByCompanyId(uint(1), 10, 0).Return(mockTasks, nil).Times(1)
+				mockUseCase.EXPECT().GetTasksByCompanyId(uint(1), uint(2), 10, 0).Return(mockTasks, nil).Times(1)
 			},
 			expectedStatus: http.StatusOK,
 			expectedBody: response.NewGetTasksResponseBody(
@@ -273,7 +275,8 @@ func TestTaskController_GetTasks(t *testing.T) {
 		},
 		{
 			name:           "BadRequest - Invalid CompanyID",
-			companyId:      "invalid",
+			companyID:      "invalid",
+			userID:         2,
 			limit:          "10",
 			offset:         "0",
 			mockFunc:       func() {},
@@ -282,7 +285,8 @@ func TestTaskController_GetTasks(t *testing.T) {
 		},
 		{
 			name:           "Limit exceeds max",
-			companyId:      "1",
+			companyID:      "1",
+			userID:         2,
 			limit:          "30",
 			offset:         "0",
 			mockFunc:       func() {},
@@ -291,22 +295,24 @@ func TestTaskController_GetTasks(t *testing.T) {
 		},
 		{
 			name:      "NotFound",
-			companyId: "1",
+			companyID: "1",
+			userID:    2,
 			limit:     "10",
 			offset:    "0",
 			mockFunc: func() {
-				mockUseCase.EXPECT().GetTasksByCompanyId(uint(1), 10, 0).Return(nil, myErrors.ErrNotFound).Times(1)
+				mockUseCase.EXPECT().GetTasksByCompanyId(uint(1), uint(2), 10, 0).Return(nil, myErrors.ErrNotFound).Times(1)
 			},
 			expectedStatus: http.StatusNotFound,
 			expectedBody:   map[string]string{"error": "not found"},
 		},
 		{
 			name:      "InternalServerError",
-			companyId: "1",
+			companyID: "1",
+			userID:    2,
 			limit:     "10",
 			offset:    "0",
 			mockFunc: func() {
-				mockUseCase.EXPECT().GetTasksByCompanyId(uint(1), 10, 0).Return(nil, errors.New("some error")).Times(1)
+				mockUseCase.EXPECT().GetTasksByCompanyId(uint(1), uint(2), 10, 0).Return(nil, errors.New("some error")).Times(1)
 			},
 			expectedStatus: http.StatusInternalServerError,
 			expectedBody:   nil,
@@ -316,11 +322,12 @@ func TestTaskController_GetTasks(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			e := echo.New()
-			req := httptest.NewRequest(http.MethodGet, "/api/v1/companies/"+tc.companyId+"/tasks?limit="+tc.limit+"&offset="+tc.offset, nil)
+			req := httptest.NewRequest(http.MethodGet, "/api/v1/companies/"+tc.companyID+"/tasks?limit="+tc.limit+"&offset="+tc.offset, nil)
 			rec := httptest.NewRecorder()
 			ctx := e.NewContext(req, rec)
 			ctx.SetParamNames("company_id")
-			ctx.SetParamValues(tc.companyId)
+			ctx.SetParamValues(tc.companyID)
+			ctx.Set("user", &model.User{ID: tc.userID})
 
 			tc.mockFunc()
 
@@ -347,6 +354,7 @@ func TestTaskController_GetTask(t *testing.T) {
 		name           string
 		companyID      string
 		taskID         string
+		userID         uint
 		mockFunc       func()
 		expectedStatus int
 		expectedBody   interface{}
@@ -355,6 +363,7 @@ func TestTaskController_GetTask(t *testing.T) {
 			name:      "Success",
 			companyID: "1",
 			taskID:    "2",
+			userID:    3,
 			mockFunc: func() {
 				task := &model.Task{
 					ID:          1,
@@ -377,7 +386,7 @@ func TestTaskController_GetTask(t *testing.T) {
 						UpdatedAt:    &[]time.Time{time.Date(2021, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
 					},
 				}
-				mockUseCase.EXPECT().GetTask(uint(1), uint(2)).Return(task, nil).Times(1)
+				mockUseCase.EXPECT().GetTask(uint(1), uint(2), uint(3)).Return(task, nil).Times(1)
 			},
 			expectedStatus: http.StatusOK,
 			expectedBody: &response.GetTaskResponseBody{
@@ -407,8 +416,9 @@ func TestTaskController_GetTask(t *testing.T) {
 			name:      "Task not found",
 			companyID: "1",
 			taskID:    "2",
+			userID:    3,
 			mockFunc: func() {
-				mockUseCase.EXPECT().GetTask(uint(1), uint(2)).Return(nil, myErrors.ErrNotFound).Times(1)
+				mockUseCase.EXPECT().GetTask(uint(1), uint(2), uint(3)).Return(nil, myErrors.ErrNotFound).Times(1)
 			},
 			expectedStatus: http.StatusNotFound,
 			expectedBody: map[string]string{
@@ -419,6 +429,7 @@ func TestTaskController_GetTask(t *testing.T) {
 			name:           "Invalid task ID",
 			companyID:      "1",
 			taskID:         "invalid",
+			userID:         3,
 			mockFunc:       func() {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   nil,
@@ -427,6 +438,7 @@ func TestTaskController_GetTask(t *testing.T) {
 			name:           "Invalid company ID",
 			companyID:      "invalid",
 			taskID:         "1",
+			userID:         3,
 			mockFunc:       func() {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   nil,
@@ -435,8 +447,9 @@ func TestTaskController_GetTask(t *testing.T) {
 			name:      "Internal server error",
 			companyID: "1",
 			taskID:    "2",
+			userID:    3,
 			mockFunc: func() {
-				mockUseCase.EXPECT().GetTask(uint(1), uint(2)).Return(nil, errors.New("some error")).Times(1)
+				mockUseCase.EXPECT().GetTask(uint(1), uint(2), uint(3)).Return(nil, errors.New("some error")).Times(1)
 			},
 			expectedStatus: http.StatusInternalServerError,
 			expectedBody: map[string]string{
@@ -453,6 +466,7 @@ func TestTaskController_GetTask(t *testing.T) {
 			ctx := e.NewContext(req, rec)
 			ctx.SetParamNames("company_id", "task_id")
 			ctx.SetParamValues(tc.companyID, tc.taskID)
+			ctx.Set("user", &model.User{ID: tc.userID})
 
 			tc.mockFunc()
 
@@ -478,13 +492,15 @@ func TestTaskController_CreateTaskByAdmin(t *testing.T) {
 
 	testCases := []struct {
 		name           string
+		userID         uint
 		requestBody    *request.CreateTaskByAdminRequestBody
 		mockFunc       func()
 		expectedStatus int
 		expectedBody   interface{}
 	}{
 		{
-			name: "Success",
+			name:   "Success",
+			userID: 2,
 			requestBody: &request.CreateTaskByAdminRequestBody{
 				CompanyId:   1,
 				Title:       "New Task",
@@ -496,40 +512,44 @@ func TestTaskController_CreateTaskByAdmin(t *testing.T) {
 			},
 			mockFunc: func() {
 				mockUseCase.EXPECT().CreateTaskByAdmin(&model.Task{
-					CompanyID:   1,
-					Title:       "New Task",
-					Description: "New task description",
-					DueDate:     &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
-					AssigneeID:  &[]uint{1}[0],
-					Visibility:  "company",
-					Status:      "pending",
+					CompanyID:    1,
+					CreateUserId: 2,
+					Title:        "New Task",
+					Description:  "New task description",
+					DueDate:      &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
+					AssigneeID:   &[]uint{1}[0],
+					Visibility:   "company",
+					Status:       "pending",
 				}).Return(&model.Task{
-					ID:          1,
-					CompanyID:   1,
-					Title:       "New Task",
-					Description: "New task description",
-					DueDate:     &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
-					AssigneeID:  &[]uint{1}[0],
-					Visibility:  "company",
-					Status:      "pending",
+					ID:           1,
+					CompanyID:    1,
+					CreateUserId: 2,
+					Title:        "New Task",
+					Description:  "New task description",
+					DueDate:      &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
+					AssigneeID:   &[]uint{1}[0],
+					Visibility:   "company",
+					Status:       "pending",
 				}, nil).Times(1)
 			},
 			expectedStatus: http.StatusCreated,
 			expectedBody: &response.CreateTaskResponseBody{
 				Task: &response.CreateTaskResponseBodyTask{
-					ID:          1,
-					CompanyID:   1,
-					Title:       "New Task",
-					Description: "New task description",
-					DueDate:     &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
-					AssigneeID:  &[]uint{1}[0],
-					Visibility:  "company",
-					Status:      "pending",
+					ID:           1,
+					CompanyID:    1,
+					CreateUserID: 2,
+					Title:        "New Task",
+					Description:  "New task description",
+					DueDate:      &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
+					AssigneeID:   &[]uint{1}[0],
+					Visibility:   "company",
+					Status:       "pending",
 				},
 			},
 		},
 		{
-			name: "Validation Error",
+			name:   "Validation Error",
+			userID: 2,
 			requestBody: &request.CreateTaskByAdminRequestBody{
 				CompanyId:   1,
 				Title:       "",
@@ -544,7 +564,8 @@ func TestTaskController_CreateTaskByAdmin(t *testing.T) {
 			expectedBody:   map[string]string{"error": "Key: 'CreateTaskByAdminRequestBody.Title' Error:Field validation for 'Title' failed on the 'required' tag"},
 		},
 		{
-			name: "Internal server error",
+			name:   "Internal server error",
+			userID: 2,
 			requestBody: &request.CreateTaskByAdminRequestBody{
 				CompanyId:   1,
 				Title:       "New Task",
@@ -556,13 +577,14 @@ func TestTaskController_CreateTaskByAdmin(t *testing.T) {
 			},
 			mockFunc: func() {
 				mockUseCase.EXPECT().CreateTaskByAdmin(&model.Task{
-					CompanyID:   1,
-					Title:       "New Task",
-					Description: "New task description",
-					DueDate:     &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
-					AssigneeID:  &[]uint{1}[0],
-					Visibility:  "company",
-					Status:      "pending",
+					CompanyID:    1,
+					CreateUserId: 2,
+					Title:        "New Task",
+					Description:  "New task description",
+					DueDate:      &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
+					AssigneeID:   &[]uint{1}[0],
+					Visibility:   "company",
+					Status:       "pending",
 				}).Return(nil, errors.New("some error")).Times(1)
 			},
 			expectedStatus: http.StatusInternalServerError,
@@ -581,6 +603,7 @@ func TestTaskController_CreateTaskByAdmin(t *testing.T) {
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
 			ctx := e.NewContext(req, rec)
+			ctx.Set("user", &model.User{ID: tc.userID})
 
 			tc.mockFunc()
 
@@ -606,6 +629,7 @@ func TestTaskController_CreateTask(t *testing.T) {
 	testCases := []struct {
 		name           string
 		companyID      string
+		userID         uint
 		requestBody    *request.CreateTaskRequestBody
 		mockFunc       func()
 		expectedStatus int
@@ -614,6 +638,7 @@ func TestTaskController_CreateTask(t *testing.T) {
 		{
 			name:      "Success",
 			companyID: "1",
+			userID:    2,
 			requestBody: &request.CreateTaskRequestBody{
 				Title:       "New Task",
 				Description: "New task description",
@@ -624,41 +649,45 @@ func TestTaskController_CreateTask(t *testing.T) {
 			},
 			mockFunc: func() {
 				mockUseCase.EXPECT().CreateTask(&model.Task{
-					CompanyID:   1,
-					Title:       "New Task",
-					Description: "New task description",
-					DueDate:     &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
-					AssigneeID:  &[]uint{1}[0],
-					Visibility:  "company",
-					Status:      "pending",
+					CompanyID:    1,
+					CreateUserId: 2,
+					Title:        "New Task",
+					Description:  "New task description",
+					DueDate:      &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
+					AssigneeID:   &[]uint{1}[0],
+					Visibility:   "company",
+					Status:       "pending",
 				}).Return(&model.Task{
-					ID:          1,
-					CompanyID:   1,
-					Title:       "New Task",
-					Description: "New task description",
-					DueDate:     &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
-					AssigneeID:  &[]uint{1}[0],
-					Visibility:  "company",
-					Status:      "pending",
+					ID:           1,
+					CompanyID:    1,
+					CreateUserId: 2,
+					Title:        "New Task",
+					Description:  "New task description",
+					DueDate:      &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
+					AssigneeID:   &[]uint{1}[0],
+					Visibility:   "company",
+					Status:       "pending",
 				}, nil).Times(1)
 			},
 			expectedStatus: http.StatusCreated,
 			expectedBody: &response.CreateTaskResponseBody{
 				Task: &response.CreateTaskResponseBodyTask{
-					ID:          1,
-					CompanyID:   1,
-					Title:       "New Task",
-					Description: "New task description",
-					DueDate:     &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
-					AssigneeID:  &[]uint{1}[0],
-					Visibility:  "company",
-					Status:      "pending",
+					ID:           1,
+					CompanyID:    1,
+					CreateUserID: 2,
+					Title:        "New Task",
+					Description:  "New task description",
+					DueDate:      &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
+					AssigneeID:   &[]uint{1}[0],
+					Visibility:   "company",
+					Status:       "pending",
 				},
 			},
 		},
 		{
 			name:      "Invalid company ID",
 			companyID: "invalid",
+			userID:    2,
 			requestBody: &request.CreateTaskRequestBody{
 				Title:       "New Task",
 				Description: "New task description",
@@ -674,6 +703,7 @@ func TestTaskController_CreateTask(t *testing.T) {
 		{
 			name:      "Validation Error",
 			companyID: "1",
+			userID:    2,
 			requestBody: &request.CreateTaskRequestBody{
 				Title:       "",
 				Description: "New task description",
@@ -689,6 +719,7 @@ func TestTaskController_CreateTask(t *testing.T) {
 		{
 			name:      "Internal server error",
 			companyID: "1",
+			userID:    2,
 			requestBody: &request.CreateTaskRequestBody{
 				Title:       "New Task",
 				Description: "New task description",
@@ -699,13 +730,14 @@ func TestTaskController_CreateTask(t *testing.T) {
 			},
 			mockFunc: func() {
 				mockUseCase.EXPECT().CreateTask(&model.Task{
-					CompanyID:   1,
-					Title:       "New Task",
-					Description: "New task description",
-					DueDate:     &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
-					AssigneeID:  &[]uint{1}[0],
-					Visibility:  "company",
-					Status:      "pending",
+					CompanyID:    1,
+					CreateUserId: 2,
+					Title:        "New Task",
+					Description:  "New task description",
+					DueDate:      &[]time.Time{time.Date(2017, time.January, 1, 0, 0, 0, 0, time.UTC)}[0],
+					AssigneeID:   &[]uint{1}[0],
+					Visibility:   "company",
+					Status:       "pending",
 				}).Return(nil, errors.New("some error")).Times(1)
 			},
 			expectedStatus: http.StatusInternalServerError,
@@ -726,6 +758,7 @@ func TestTaskController_CreateTask(t *testing.T) {
 			ctx := e.NewContext(req, rec)
 			ctx.SetParamNames("company_id")
 			ctx.SetParamValues(tc.companyID)
+			ctx.Set("user", &model.User{ID: tc.userID})
 
 			tc.mockFunc()
 
@@ -919,6 +952,7 @@ func TestTaskController_UpdateTask(t *testing.T) {
 		name           string
 		companyID      string
 		taskID         string
+		userID         uint
 		requestBody    *request.UpdateTaskRequestBody
 		mockFunc       func()
 		expectedStatus int
@@ -928,6 +962,7 @@ func TestTaskController_UpdateTask(t *testing.T) {
 			name:      "Success",
 			companyID: "1",
 			taskID:    "1",
+			userID:    3,
 			requestBody: &request.UpdateTaskRequestBody{
 				Title:       "Updated Task",
 				Description: "Updated task description",
@@ -937,7 +972,7 @@ func TestTaskController_UpdateTask(t *testing.T) {
 				Status:      "pending",
 			},
 			mockFunc: func() {
-				mockUseCase.EXPECT().UpdateTask(uint(1), uint(1), &model.Task{
+				mockUseCase.EXPECT().UpdateTask(uint(1), uint(1), uint(3), &model.Task{
 					ID:          1,
 					CompanyID:   1,
 					Title:       "Updated Task",
@@ -975,6 +1010,7 @@ func TestTaskController_UpdateTask(t *testing.T) {
 			name:      "Invalid task ID",
 			companyID: "1",
 			taskID:    "invalid",
+			userID:    3,
 			requestBody: &request.UpdateTaskRequestBody{
 				Title:       "Updated Task",
 				Description: "Updated task description",
@@ -990,6 +1026,7 @@ func TestTaskController_UpdateTask(t *testing.T) {
 			name:      "Invalid company ID",
 			companyID: "invalid",
 			taskID:    "1",
+			userID:    3,
 			requestBody: &request.UpdateTaskRequestBody{
 				Title:       "Updated Task",
 				Description: "Updated task description",
@@ -1005,6 +1042,7 @@ func TestTaskController_UpdateTask(t *testing.T) {
 			name:      "Validation Error",
 			companyID: "1",
 			taskID:    "1",
+			userID:    3,
 			requestBody: &request.UpdateTaskRequestBody{
 				Title:       "",
 				Description: "Updated task description",
@@ -1021,6 +1059,7 @@ func TestTaskController_UpdateTask(t *testing.T) {
 			name:      "Not found",
 			companyID: "1",
 			taskID:    "1",
+			userID:    3,
 			requestBody: &request.UpdateTaskRequestBody{
 				Title:       "Updated Task",
 				Description: "Updated task description",
@@ -1029,7 +1068,7 @@ func TestTaskController_UpdateTask(t *testing.T) {
 				Visibility:  "company",
 				Status:      "pending",
 			}, mockFunc: func() {
-				mockUseCase.EXPECT().UpdateTask(uint(1), uint(1), &model.Task{
+				mockUseCase.EXPECT().UpdateTask(uint(1), uint(1), uint(3), &model.Task{
 					ID:          1,
 					CompanyID:   1,
 					Title:       "Updated Task",
@@ -1047,6 +1086,7 @@ func TestTaskController_UpdateTask(t *testing.T) {
 			name:      "Internal server error",
 			companyID: "1",
 			taskID:    "1",
+			userID:    3,
 			requestBody: &request.UpdateTaskRequestBody{
 				Title:       "Updated Task",
 				Description: "Updated task description",
@@ -1055,7 +1095,7 @@ func TestTaskController_UpdateTask(t *testing.T) {
 				Visibility:  "company",
 				Status:      "pending",
 			}, mockFunc: func() {
-				mockUseCase.EXPECT().UpdateTask(uint(1), uint(1), &model.Task{
+				mockUseCase.EXPECT().UpdateTask(uint(1), uint(1), uint(3), &model.Task{
 					ID:          1,
 					CompanyID:   1,
 					Title:       "Updated Task",
@@ -1084,6 +1124,7 @@ func TestTaskController_UpdateTask(t *testing.T) {
 			ctx := e.NewContext(req, rec)
 			ctx.SetParamNames("company_id", "task_id")
 			ctx.SetParamValues(tc.companyID, tc.taskID)
+			ctx.Set("user", &model.User{ID: tc.userID})
 
 			tc.mockFunc()
 
@@ -1188,6 +1229,7 @@ func TestTaskController_DeleteTask(t *testing.T) {
 		name           string
 		companyID      string
 		taskID         string
+		userID         uint
 		mockFunc       func()
 		expectedStatus int
 		expectedBody   interface{}
@@ -1196,8 +1238,9 @@ func TestTaskController_DeleteTask(t *testing.T) {
 			name:      "Success",
 			companyID: "1",
 			taskID:    "2",
+			userID:    3,
 			mockFunc: func() {
-				mockUseCase.EXPECT().DeleteTask(uint(1), uint(2)).Return(nil).Times(1)
+				mockUseCase.EXPECT().DeleteTask(uint(1), uint(2), uint(3)).Return(nil).Times(1)
 			},
 			expectedStatus: http.StatusOK,
 			expectedBody:   nil,
@@ -1206,6 +1249,7 @@ func TestTaskController_DeleteTask(t *testing.T) {
 			name:           "Invalid task ID",
 			companyID:      "1",
 			taskID:         "invalid",
+			userID:         3,
 			mockFunc:       func() {},
 			expectedStatus: http.StatusInternalServerError,
 			expectedBody:   nil,
@@ -1214,6 +1258,7 @@ func TestTaskController_DeleteTask(t *testing.T) {
 			name:           "Invalid company ID",
 			companyID:      "invalid",
 			taskID:         "2",
+			userID:         3,
 			mockFunc:       func() {},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   nil,
@@ -1222,8 +1267,9 @@ func TestTaskController_DeleteTask(t *testing.T) {
 			name:      "Not found",
 			companyID: "1",
 			taskID:    "2",
+			userID:    3,
 			mockFunc: func() {
-				mockUseCase.EXPECT().DeleteTask(uint(1), uint(2)).Return(myErrors.ErrNotFound).Times(1)
+				mockUseCase.EXPECT().DeleteTask(uint(1), uint(2), uint(3)).Return(myErrors.ErrNotFound).Times(1)
 			},
 			expectedStatus: http.StatusNotFound,
 			expectedBody:   map[string]string{"error": "not found"},
@@ -1232,8 +1278,9 @@ func TestTaskController_DeleteTask(t *testing.T) {
 			name:      "Internal server error",
 			companyID: "1",
 			taskID:    "2",
+			userID:    3,
 			mockFunc: func() {
-				mockUseCase.EXPECT().DeleteTask(uint(1), uint(2)).Return(errors.New("internal error")).Times(1)
+				mockUseCase.EXPECT().DeleteTask(uint(1), uint(2), uint(3)).Return(errors.New("internal error")).Times(1)
 			},
 			expectedStatus: http.StatusInternalServerError,
 			expectedBody:   nil,
@@ -1248,6 +1295,7 @@ func TestTaskController_DeleteTask(t *testing.T) {
 			ctx := e.NewContext(req, rec)
 			ctx.SetParamNames("company_id", "task_id")
 			ctx.SetParamValues(tc.companyID, tc.taskID)
+			ctx.Set("user", &model.User{ID: tc.userID})
 
 			tc.mockFunc()
 

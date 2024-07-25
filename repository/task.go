@@ -10,10 +10,10 @@ import (
 )
 
 type TaskRepository interface {
-	GetTasksByCompanyId(companyId uint, limit, offset int) ([]*model.Task, error)
+	GetTasksByCompanyId(companyId, createUserId uint, limit, offset int) ([]*model.Task, error)
 	GetTasks(limit, offset int) ([]*model.Task, error)
 	GetTaskById(id uint) (*model.Task, error)
-	GetTask(companyId, id uint) (*model.Task, error)
+	GetTask(companyId, id, createUserId uint) (*model.Task, error)
 	CreateTask(task *model.Task) (*model.Task, error)
 	UpdateTask(id uint, task *model.Task) (*model.Task, error)
 	DeleteTaskById(id uint) error
@@ -28,9 +28,12 @@ func NewTaskRepository(db *gorm.DB) TaskRepository {
 	return &taskRepository{db: db}
 }
 
-func (r *taskRepository) GetTasksByCompanyId(companyId uint, limit, offset int) ([]*model.Task, error) {
+func (r *taskRepository) GetTasksByCompanyId(companyId, createUserId uint, limit, offset int) ([]*model.Task, error) {
 	tasks := []*model.Task{}
-	result := r.db.Preload("Assignee").Where("company_id = ?", companyId).Limit(limit).Offset(offset).Find(&tasks)
+	result := r.db.Preload("Assignee").
+		Where("company_id = ?", companyId).
+		Where("visibility = 'private' AND create_user_id = ? OR visibility != 'private'", createUserId).
+		Limit(limit).Offset(offset).Find(&tasks)
 	if result.Error != nil {
 		slog.Info(fmt.Sprintf("error GetTasks: %v", result.Error))
 		return nil, myErrors.ErrDb
@@ -61,9 +64,12 @@ func (r *taskRepository) GetTaskById(id uint) (*model.Task, error) {
 	return task, nil
 }
 
-func (r *taskRepository) GetTask(companyId, id uint) (*model.Task, error) {
+func (r *taskRepository) GetTask(companyId, id, createUserId uint) (*model.Task, error) {
 	task := &model.Task{}
-	result := r.db.Preload("Assignee").Where("id = ? AND company_id = ?", id, companyId).Find(task)
+	result := r.db.Preload("Assignee").
+		Where("id = ? AND company_id = ?", id, companyId).
+		Where("visibility = 'private' AND create_user_id = ? OR visibility != 'private'", createUserId).
+		Find(task)
 	if result.Error != nil {
 		slog.Info(fmt.Sprintf("error GetTask: %v", result.Error))
 		return nil, myErrors.ErrDb

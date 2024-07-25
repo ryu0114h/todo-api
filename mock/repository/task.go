@@ -83,18 +83,18 @@ func (mr *MockTaskRepositoryMockRecorder) DeleteTaskById(id any) *gomock.Call {
 }
 
 // GetTask mocks base method.
-func (m *MockTaskRepository) GetTask(companyId, id uint) (*model.Task, error) {
+func (m *MockTaskRepository) GetTask(companyId, id, createUserId uint) (*model.Task, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTask", companyId, id)
+	ret := m.ctrl.Call(m, "GetTask", companyId, id, createUserId)
 	ret0, _ := ret[0].(*model.Task)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTask indicates an expected call of GetTask.
-func (mr *MockTaskRepositoryMockRecorder) GetTask(companyId, id any) *gomock.Call {
+func (mr *MockTaskRepositoryMockRecorder) GetTask(companyId, id, createUserId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTask", reflect.TypeOf((*MockTaskRepository)(nil).GetTask), companyId, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTask", reflect.TypeOf((*MockTaskRepository)(nil).GetTask), companyId, id, createUserId)
 }
 
 // GetTaskById mocks base method.
@@ -128,18 +128,18 @@ func (mr *MockTaskRepositoryMockRecorder) GetTasks(limit, offset any) *gomock.Ca
 }
 
 // GetTasksByCompanyId mocks base method.
-func (m *MockTaskRepository) GetTasksByCompanyId(companyId uint, limit, offset int) ([]*model.Task, error) {
+func (m *MockTaskRepository) GetTasksByCompanyId(companyId, createUserId uint, limit, offset int) ([]*model.Task, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetTasksByCompanyId", companyId, limit, offset)
+	ret := m.ctrl.Call(m, "GetTasksByCompanyId", companyId, createUserId, limit, offset)
 	ret0, _ := ret[0].([]*model.Task)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetTasksByCompanyId indicates an expected call of GetTasksByCompanyId.
-func (mr *MockTaskRepositoryMockRecorder) GetTasksByCompanyId(companyId, limit, offset any) *gomock.Call {
+func (mr *MockTaskRepositoryMockRecorder) GetTasksByCompanyId(companyId, createUserId, limit, offset any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTasksByCompanyId", reflect.TypeOf((*MockTaskRepository)(nil).GetTasksByCompanyId), companyId, limit, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTasksByCompanyId", reflect.TypeOf((*MockTaskRepository)(nil).GetTasksByCompanyId), companyId, createUserId, limit, offset)
 }
 
 // UpdateTask mocks base method.

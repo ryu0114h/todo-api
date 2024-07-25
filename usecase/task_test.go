@@ -24,6 +24,7 @@ func TestTaskUseCase_GetTasksByCompanyId(t *testing.T) {
 	taskUseCase := usecase.NewTaskUseCase(mockTaskRepo, mockCompanyRepo, mockCompanyUserRepo)
 
 	companyId := uint(1)
+	userId := uint(2)
 	limit := 10
 	offset := 0
 
@@ -37,7 +38,7 @@ func TestTaskUseCase_GetTasksByCompanyId(t *testing.T) {
 			name: "Success",
 			mockFunc: func() {
 				mockCompanyRepo.EXPECT().GetCompany(companyId).Return(&model.Company{ID: companyId}, nil).Times(1)
-				mockTaskRepo.EXPECT().GetTasksByCompanyId(companyId, limit, offset).Return([]*model.Task{}, nil).Times(1)
+				mockTaskRepo.EXPECT().GetTasksByCompanyId(companyId, userId, limit, offset).Return([]*model.Task{}, nil).Times(1)
 			},
 			expectedResult: []*model.Task{},
 			expectedError:  nil,
@@ -54,7 +55,7 @@ func TestTaskUseCase_GetTasksByCompanyId(t *testing.T) {
 			name: "Error in GetTasksByCompanyId",
 			mockFunc: func() {
 				mockCompanyRepo.EXPECT().GetCompany(companyId).Return(&model.Company{ID: companyId}, nil).Times(1)
-				mockTaskRepo.EXPECT().GetTasksByCompanyId(companyId, limit, offset).Return(nil, errors.New("some error")).Times(1)
+				mockTaskRepo.EXPECT().GetTasksByCompanyId(companyId, userId, limit, offset).Return(nil, errors.New("some error")).Times(1)
 			},
 			expectedResult: nil,
 			expectedError:  errors.New("some error"),
@@ -65,7 +66,7 @@ func TestTaskUseCase_GetTasksByCompanyId(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.mockFunc()
 
-			tasks, err := taskUseCase.GetTasksByCompanyId(companyId, limit, offset)
+			tasks, err := taskUseCase.GetTasksByCompanyId(companyId, userId, limit, offset)
 
 			assert.Equal(t, tc.expectedResult, tasks)
 			assert.Equal(t, tc.expectedError, err)
@@ -133,7 +134,8 @@ func TestTaskUseCase_GetTask(t *testing.T) {
 	taskUseCase := usecase.NewTaskUseCase(mockTaskRepo, mockCompanyRepo, mockCompanyUserRepo)
 
 	companyId := uint(1)
-	taskId := uint(1)
+	userId := uint(2)
+	taskId := uint(3)
 
 	testCases := []struct {
 		name           string
@@ -144,7 +146,7 @@ func TestTaskUseCase_GetTask(t *testing.T) {
 		{
 			name: "Success",
 			mockFunc: func() {
-				mockTaskRepo.EXPECT().GetTask(companyId, taskId).Return(&model.Task{ID: taskId, CompanyID: companyId}, nil).Times(1)
+				mockTaskRepo.EXPECT().GetTask(companyId, taskId, userId).Return(&model.Task{ID: taskId, CompanyID: companyId}, nil).Times(1)
 			},
 			expectedResult: &model.Task{ID: taskId, CompanyID: companyId},
 			expectedError:  nil,
@@ -152,7 +154,7 @@ func TestTaskUseCase_GetTask(t *testing.T) {
 		{
 			name: "Task not found",
 			mockFunc: func() {
-				mockTaskRepo.EXPECT().GetTask(companyId, taskId).Return(nil, errors.New("task not found")).Times(1)
+				mockTaskRepo.EXPECT().GetTask(companyId, taskId, userId).Return(nil, errors.New("task not found")).Times(1)
 			},
 			expectedResult: nil,
 			expectedError:  errors.New("task not found"),
@@ -163,7 +165,7 @@ func TestTaskUseCase_GetTask(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.mockFunc()
 
-			task, err := taskUseCase.GetTask(companyId, taskId)
+			task, err := taskUseCase.GetTask(companyId, taskId, userId)
 
 			assert.Equal(t, tc.expectedResult, task)
 			assert.Equal(t, tc.expectedError, err)
@@ -393,7 +395,8 @@ func TestTaskUseCase_UpdateTask(t *testing.T) {
 	taskUseCase := usecase.NewTaskUseCase(mockTaskRepo, mockCompanyRepo, mockCompanyUserRepo)
 
 	companyId := uint(1)
-	taskId := uint(2)
+	userId := uint(2)
+	taskId := uint(3)
 	task := &model.Task{
 		CompanyID:   companyId,
 		Title:       "Updated Task Title",
@@ -414,7 +417,7 @@ func TestTaskUseCase_UpdateTask(t *testing.T) {
 			name: "Success",
 			mockFunc: func() {
 				mockCompanyUserRepo.EXPECT().GetCompanyUser(task.CompanyID, *task.AssigneeID).Return(&model.CompanyUser{ID: *task.AssigneeID}, nil).Times(1)
-				mockTaskRepo.EXPECT().GetTask(companyId, taskId).Return(&model.Task{ID: taskId, CompanyID: companyId}, nil).Times(1)
+				mockTaskRepo.EXPECT().GetTask(companyId, taskId, userId).Return(&model.Task{ID: taskId, CompanyID: companyId}, nil).Times(1)
 				mockTaskRepo.EXPECT().UpdateTask(taskId, &model.Task{
 					ID:          taskId,
 					CompanyID:   companyId,
@@ -441,7 +444,7 @@ func TestTaskUseCase_UpdateTask(t *testing.T) {
 			name: "Task not found",
 			mockFunc: func() {
 				mockCompanyUserRepo.EXPECT().GetCompanyUser(task.CompanyID, *task.AssigneeID).Return(&model.CompanyUser{ID: *task.AssigneeID}, nil).Times(1)
-				mockTaskRepo.EXPECT().GetTask(companyId, taskId).Return(nil, errors.New("task not found")).Times(1)
+				mockTaskRepo.EXPECT().GetTask(companyId, taskId, userId).Return(nil, errors.New("task not found")).Times(1)
 			},
 			expectedResult: nil,
 			expectedError:  errors.New("task not found"),
@@ -450,7 +453,7 @@ func TestTaskUseCase_UpdateTask(t *testing.T) {
 			name: "Error in UpdateTask",
 			mockFunc: func() {
 				mockCompanyUserRepo.EXPECT().GetCompanyUser(task.CompanyID, *task.AssigneeID).Return(&model.CompanyUser{ID: *task.AssigneeID}, nil).Times(1)
-				mockTaskRepo.EXPECT().GetTask(companyId, taskId).Return(&model.Task{ID: taskId, CompanyID: companyId}, nil).Times(1)
+				mockTaskRepo.EXPECT().GetTask(companyId, taskId, userId).Return(&model.Task{ID: taskId, CompanyID: companyId}, nil).Times(1)
 				mockTaskRepo.EXPECT().UpdateTask(taskId, &model.Task{
 					ID:          taskId,
 					CompanyID:   companyId,
@@ -471,7 +474,7 @@ func TestTaskUseCase_UpdateTask(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.mockFunc()
 
-			updatedTask, err := taskUseCase.UpdateTask(companyId, taskId, task)
+			updatedTask, err := taskUseCase.UpdateTask(companyId, taskId, userId, task)
 
 			assert.Equal(t, tc.expectedResult, updatedTask)
 			assert.Equal(t, tc.expectedError, err)
@@ -499,13 +502,27 @@ func TestTaskUseCase_DeleteTaskByAdmin(t *testing.T) {
 		{
 			name: "Success",
 			mockFunc: func() {
+				mockTaskRepo.EXPECT().GetTaskById(taskId).Return(&model.Task{
+					ID: taskId,
+				}, nil).Times(1)
 				mockTaskRepo.EXPECT().DeleteTaskById(taskId).Return(nil).Times(1)
 			},
 			expectedError: nil,
 		},
 		{
+			name: "Error in GetTaskById",
+			mockFunc: func() {
+				mockTaskRepo.EXPECT().GetTaskById(taskId).Return(nil,
+					errors.New("some error")).Times(1)
+			},
+			expectedError: errors.New("some error"),
+		},
+		{
 			name: "Error in DeleteTaskById",
 			mockFunc: func() {
+				mockTaskRepo.EXPECT().GetTaskById(taskId).Return(&model.Task{
+					ID: taskId,
+				}, nil).Times(1)
 				mockTaskRepo.EXPECT().DeleteTaskById(taskId).Return(errors.New("some error")).Times(1)
 			},
 			expectedError: errors.New("some error"),
@@ -535,6 +552,7 @@ func TestTaskUseCase_DeleteTask(t *testing.T) {
 
 	companyId := uint(1)
 	taskId := uint(2)
+	userId := uint(3)
 
 	testCases := []struct {
 		name          string
@@ -544,13 +562,27 @@ func TestTaskUseCase_DeleteTask(t *testing.T) {
 		{
 			name: "Success",
 			mockFunc: func() {
+				mockTaskRepo.EXPECT().GetTask(companyId, taskId, userId).Return(&model.Task{
+					ID: taskId,
+				}, nil).Times(1)
 				mockTaskRepo.EXPECT().DeleteTask(companyId, taskId).Return(nil).Times(1)
 			},
 			expectedError: nil,
 		},
 		{
+			name: "Error in GetTask",
+			mockFunc: func() {
+				mockTaskRepo.EXPECT().GetTask(companyId, taskId, userId).Return(nil,
+					errors.New("some error")).Times(1)
+			},
+			expectedError: errors.New("some error"),
+		},
+		{
 			name: "Error in DeleteTask",
 			mockFunc: func() {
+				mockTaskRepo.EXPECT().GetTask(companyId, taskId, userId).Return(&model.Task{
+					ID: taskId,
+				}, nil).Times(1)
 				mockTaskRepo.EXPECT().DeleteTask(companyId, taskId).Return(errors.New("some error")).Times(1)
 			},
 			expectedError: errors.New("some error"),
@@ -561,7 +593,7 @@ func TestTaskUseCase_DeleteTask(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.mockFunc()
 
-			err := taskUseCase.DeleteTask(companyId, taskId)
+			err := taskUseCase.DeleteTask(companyId, taskId, userId)
 
 			assert.Equal(t, tc.expectedError, err)
 		})

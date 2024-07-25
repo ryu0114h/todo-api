@@ -9,6 +9,7 @@ import (
 	"todo-api/controller/request"
 	"todo-api/controller/response"
 	myErrors "todo-api/errors"
+	"todo-api/model"
 	"todo-api/usecase"
 
 	"github.com/go-playground/validator/v10"
@@ -106,7 +107,8 @@ func (c *taskController) GetTasks(ctx echo.Context) error {
 		offset = DEFAULT_TASK_OFFSET
 	}
 
-	tasks, err := c.taskUseCase.GetTasksByCompanyId(uint(companyId), limit, offset)
+	user := ctx.Get("user").(*model.User)
+	tasks, err := c.taskUseCase.GetTasksByCompanyId(uint(companyId), user.ID, limit, offset)
 	if err != nil {
 		if errors.Is(err, myErrors.ErrNotFound) {
 			return ctx.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
@@ -128,7 +130,8 @@ func (c *taskController) GetTask(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, nil)
 	}
 
-	task, err := c.taskUseCase.GetTask(uint(companyId), uint(id))
+	user := ctx.Get("user").(*model.User)
+	task, err := c.taskUseCase.GetTask(uint(companyId), uint(id), user.ID)
 	if err != nil {
 		if errors.Is(err, myErrors.ErrNotFound) {
 			return ctx.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
@@ -152,7 +155,8 @@ func (c *taskController) CreateTaskByAdmin(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	task := request.NewTaskFromCreateTaskByAdminRequestBody(requestBody)
+	user := ctx.Get("user").(*model.User)
+	task := request.NewTaskFromCreateTaskByAdminRequestBody(user.ID, requestBody)
 	task, err := c.taskUseCase.CreateTaskByAdmin(task)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create task"})
@@ -177,7 +181,8 @@ func (c *taskController) CreateTask(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	task := request.NewTaskFromCreateTaskRequestBody(uint(companyId), requestBody)
+	user := ctx.Get("user").(*model.User)
+	task := request.NewTaskFromCreateTaskRequestBody(uint(companyId), user.ID, requestBody)
 	task, err = c.taskUseCase.CreateTask(task)
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create task"})
@@ -237,7 +242,8 @@ func (c *taskController) UpdateTask(ctx echo.Context) error {
 	}
 
 	task := request.NewTaskFromUpdateTaskRequestBody(uint(taskId), uint(companyId), requestBody)
-	task, err = c.taskUseCase.UpdateTask(uint(companyId), uint(taskId), task)
+	user := ctx.Get("user").(*model.User)
+	task, err = c.taskUseCase.UpdateTask(uint(companyId), uint(taskId), user.ID, task)
 	if err != nil {
 		if errors.Is(err, myErrors.ErrNotFound) {
 			return ctx.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
@@ -278,7 +284,8 @@ func (c *taskController) DeleteTask(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, nil)
 	}
 
-	err = c.taskUseCase.DeleteTask(uint(companyId), uint(taskId))
+	user := ctx.Get("user").(*model.User)
+	err = c.taskUseCase.DeleteTask(uint(companyId), uint(taskId), user.ID)
 	if err != nil {
 		if errors.Is(err, myErrors.ErrNotFound) {
 			return ctx.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
